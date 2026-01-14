@@ -2,8 +2,8 @@ import type { AccessibilityIssue, ToolSource, Severity } from '@/types/index.js'
 
 export interface NormalizerContext {
   tool: ToolSource;
-  targetUrl?: string;
-  targetFile?: string;
+  targetUrl?: string | undefined;
+  targetFile?: string | undefined;
 }
 
 export interface Normalizer<TRawResult = unknown> {
