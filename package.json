@@ -34,10 +34,14 @@
   "dependencies": {
     "@axe-core/puppeteer": "^4.11.0",
     "@modelcontextprotocol/sdk": "^1.25.1",
+    "@vue/compiler-sfc": "^3.5.26",
     "axe-core": "^4.11.1",
+    "eslint": "^9.39.2",
+    "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "pa11y": "^9.0.1",
     "pino": "^10.1.1",
     "puppeteer": "^24.35.0",
+    "vue-eslint-parser": "^10.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
