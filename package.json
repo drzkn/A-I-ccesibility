@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/check-node-version.js",
     "build": "tsup",
     "dev": "tsup --watch",
     "start": "node dist/server.js",
@@ -29,7 +30,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.26.2",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@axe-core/puppeteer": "^4.11.0",

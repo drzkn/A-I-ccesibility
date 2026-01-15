@@ -13,7 +13,7 @@ import {
 } from "@/tools/index.js";
 
 const server = new McpServer({
-  name: 'mcp-a11y-server',
+  name: 'AI-ccesibility',
   version: '0.1.0'
 });
 
