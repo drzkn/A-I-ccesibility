@@ -1,6 +1,6 @@
 {
   "name": "ai-ccesibility",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "AI-ccesibility - MCP Server for web accessibility tools orchestration",
   "main": "dist/server.js",
   "types": "dist/server.d.ts",

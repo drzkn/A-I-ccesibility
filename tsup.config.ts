@@ -11,6 +11,10 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   minify: false,
+  shims: true,
+  banner: {
+    js: '#!/usr/bin/env node',
+  },
   esbuildOptions(options) {
     options.alias = {
       '@/types': './src/types',

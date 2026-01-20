@@ -14,7 +14,7 @@ import {
 
 const server = new McpServer({
   name: 'AI-ccesibility',
-  version: '0.1.0'
+  version: '0.1.1'
 });
 
 function registerTools(): void {
@@ -33,7 +33,7 @@ function registerTools(): void {
 
 async function main(): Promise<void> {
   logger.info('Starting AI-ccesibility Server', {
-    version: '0.1.0',
+    version: '0.1.1',
     tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all']
   });
 
