@@ -314,7 +314,7 @@ Una vez configurado, puedes usar prompts como:
 
 Si estás desarrollando o contribuyendo al proyecto, puedes usar rutas locales en lugar de npx:
 
-**Claude Desktop / Windsurf / Antigravity / Claude Code**:
+**Claude Desktop / Windsurf / Claude Code**:
 ```json
 {
   "mcpServers": {
