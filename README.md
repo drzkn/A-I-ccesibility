@@ -18,6 +18,7 @@ Servidor MCP para orquestación de herramientas de accesibilidad web (axe-core, 
   - [Claude Desktop](#claude-desktop)
   - [Cursor](#cursor)
   - [Windsurf](#windsurf)
+  - [Claude Code](#claude-code)
 - [Uso](#uso)
   - [Desarrollo Local](#desarrollo-local)
 - [Configuración](#configuración)
@@ -275,6 +276,31 @@ pnpm add -g ai-ccesibility
 
 3. Reinicia Windsurf
 
+### Claude Code
+
+1. Abre el archivo de configuración:
+   - **macOS**: `~/Library/Application Support/Code/User/globalStorage/anthropic.claude-code/settings/cline_mcp_settings.json`
+   - **Windows**: `%APPDATA%\Code\User\globalStorage\anthropic.claude-code\settings\cline_mcp_settings.json`
+   - **Linux**: `~/.config/Code/User/globalStorage/anthropic.claude-code/settings/cline_mcp_settings.json`
+
+2. Añade la configuración del servidor:
+
+```json
+{
+  "mcpServers": {
+    "ai-ccesibility": {
+      "command": "npx",
+      "args": ["-y", "ai-ccesibility"],
+      "env": {
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+3. Reinicia VS Code o recarga la ventana (Cmd/Ctrl + Shift + P → "Developer: Reload Window")
+
 ## Uso
 
 Una vez configurado, puedes usar prompts como:
@@ -288,7 +314,7 @@ Una vez configurado, puedes usar prompts como:
 
 Si estás desarrollando o contribuyendo al proyecto, puedes usar rutas locales en lugar de npx:
 
-**Claude Desktop / Windsurf**:
+**Claude Desktop / Windsurf / Antigravity / Claude Code**:
 ```json
 {
   "mcpServers": {
@@ -315,6 +341,8 @@ Si estás desarrollando o contribuyendo al proyecto, puedes usar rutas locales e
   }
 }
 ```
+
+> 💡 **Tip**: Recuerda ejecutar `pnpm build` cada vez que hagas cambios en el código para que se reflejen en el servidor.
 
 ## Configuración
 
