@@ -24,11 +24,16 @@ Servidor MCP para orquestación de herramientas de accesibilidad web (axe-core, 
 - [Configuración](#configuración)
 - [Requisitos](#requisitos)
 - [Dependencias Principales](#dependencias-principales)
+- [Apóyame](#apóyame)
 
 ## 📚 Documentación
 
 - **[USAGE.md](./USAGE.md)** - Guía completa de uso, workflows y prompts efectivos
 - **[EXAMPLES.md](./EXAMPLES.md)** - Ejemplos concretos de inputs/outputs para cada herramienta
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/theraaskin)
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/raskreation)
+
 
 ## Herramientas Disponibles
 
