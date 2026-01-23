@@ -14,7 +14,7 @@ import {
 
 const server = new McpServer({
   name: 'AccesibilityHub',
-  version: '0.1.4'
+  version: '0.1.1'
 });
 
 function registerTools(): void {
@@ -33,7 +33,7 @@ function registerTools(): void {
 
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
-    version: '0.1.4',
+    version: '0.1.1',
     tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all']
   });
 
