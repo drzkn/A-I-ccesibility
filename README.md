@@ -236,7 +236,7 @@ pnpm add -g AccesibilityHub
 
 #### Instalación rápida con un clic
 
-[<img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor">](https://cursor.com/en/install-mcp?name=AccesibilityHub&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFpLWNjZXNpYmlsaXR5Il19Cg%3D%3D)
+[<img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor">](https://cursor.com/en/install-mcp?name=accessibility-hub&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImFjY2Vzc2liaWxpdHktaHViIl19)
 
 #### Instalación manual
 
