@@ -17,6 +17,7 @@ import type {
 export interface AxeAdapterConfig extends AdapterConfig {
   headless?: boolean;
   browserArgs?: string[];
+  ignoreHTTPSErrors?: boolean;
 }
 
 interface WCAGTagInfo {
@@ -113,10 +114,17 @@ export class AxeAdapter extends BaseAdapter {
 
   private async ensureBrowser(): Promise<void> {
     if (!this.browser || !this.browser.connected) {
-      this.logger.debug('Launching browser');
+      this.logger.debug('Launching browser', { ignoreHTTPSErrors: this.axeConfig.ignoreHTTPSErrors });
+      
+      const baseArgs = this.axeConfig.browserArgs ?? ['--no-sandbox', '--disable-setuid-sandbox'];
+      const sslArgs = this.axeConfig.ignoreHTTPSErrors 
+        ? ['--ignore-certificate-errors', '--ignore-ssl-errors', '--allow-running-insecure-content']
+        : [];
+      
       this.browser = await puppeteer.launch({
         headless: this.axeConfig.headless ?? true,
-        args: this.axeConfig.browserArgs ?? ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: [...baseArgs, ...sslArgs],
+        acceptInsecureCerts: this.axeConfig.ignoreHTTPSErrors ?? false,
       });
     }
   }

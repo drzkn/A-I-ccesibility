@@ -13,12 +13,20 @@ import {
 } from './base.js';
 
 let sharedAdapter: Pa11yAdapter | null = null;
+let currentIgnoreHTTPS = false;
 
-function getAdapter(): Pa11yAdapter {
-  if (!sharedAdapter) {
+function getAdapter(ignoreHTTPSErrors = false): Pa11yAdapter {
+  if (!sharedAdapter || currentIgnoreHTTPS !== ignoreHTTPSErrors) {
+    if (sharedAdapter) {
+      sharedAdapter.dispose().catch(() => {});
+    }
     sharedAdapter = new Pa11yAdapter({
       timeout: 30000,
+      chromeLaunchConfig: {
+        ignoreHTTPSErrors,
+      },
     });
+    currentIgnoreHTTPS = ignoreHTTPSErrors;
   }
   return sharedAdapter;
 }
@@ -47,6 +55,7 @@ function buildAnalysisTarget(input: Pa11yToolInput): AnalysisTarget {
         waitForSelector: input.options?.browser?.waitForSelector,
         timeout: input.options?.browser?.waitForTimeout,
         viewport: input.options?.browser?.viewport,
+        ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
       },
     };
   }
@@ -58,6 +67,7 @@ function buildAnalysisTarget(input: Pa11yToolInput): AnalysisTarget {
       waitForSelector: input.options?.browser?.waitForSelector,
       timeout: input.options?.browser?.waitForTimeout,
       viewport: input.options?.browser?.viewport,
+      ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
     },
   };
 }
@@ -109,13 +119,16 @@ function formatOutput(result: AnalysisResult): Pa11yToolOutput {
 const handlePa11yAnalysis = withToolContext<Pa11yToolInput>(
   'analyze-with-pa11y',
   async (input, context): Promise<ToolResponse> => {
+    const ignoreHTTPSErrors = input.options?.browser?.ignoreHTTPSErrors ?? false;
+    
     context.logger.debug('Building analysis configuration', {
       hasUrl: !!input.url,
       hasHtml: !!input.html,
       standard: input.options?.standard ?? 'WCAG21AA',
+      ignoreHTTPSErrors,
     });
 
-    const adapter = getAdapter();
+    const adapter = getAdapter(ignoreHTTPSErrors);
 
     const isAvailable = await adapter.isAvailable();
     if (!isAvailable) {
@@ -174,6 +187,10 @@ const Pa11yToolMcpInputSchema = z.object({
               height: z.number().int().positive().default(720),
             })
             .optional(),
+          ignoreHTTPSErrors: z
+            .boolean()
+            .default(false)
+            .describe('Ignore HTTPS certificate errors (for local dev servers with self-signed certs)'),
         })
         .optional(),
     })
@@ -196,6 +213,7 @@ Input options
 - options.hideElements: CSS selector for elements to hide from testing
 - options.browser.waitForSelector: CSS selector to wait for before analysis
 - options.browser.viewport: Browser viewport dimensions
+- options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors (for local dev servers). Default: false
 
 Output:
 - issues: Array of accessibility issues found

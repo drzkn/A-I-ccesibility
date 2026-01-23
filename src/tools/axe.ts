@@ -13,13 +13,19 @@ import {
 } from './base.js';
 
 let sharedAdapter: AxeAdapter | null = null;
+let currentIgnoreHTTPS = false;
 
-function getAdapter(): AxeAdapter {
-  if (!sharedAdapter) {
+function getAdapter(ignoreHTTPSErrors = false): AxeAdapter {
+  if (!sharedAdapter || currentIgnoreHTTPS !== ignoreHTTPSErrors) {
+    if (sharedAdapter) {
+      sharedAdapter.dispose().catch(() => {});
+    }
     sharedAdapter = new AxeAdapter({
       headless: true,
       timeout: 30000,
+      ignoreHTTPSErrors,
     });
+    currentIgnoreHTTPS = ignoreHTTPSErrors;
   }
   return sharedAdapter;
 }
@@ -48,6 +54,7 @@ function buildAnalysisTarget(input: AxeToolInput): AnalysisTarget {
         waitForSelector: input.options?.browser?.waitForSelector,
         timeout: input.options?.browser?.waitForTimeout,
         viewport: input.options?.browser?.viewport,
+        ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
       },
     };
   }
@@ -59,6 +66,7 @@ function buildAnalysisTarget(input: AxeToolInput): AnalysisTarget {
       waitForSelector: input.options?.browser?.waitForSelector,
       timeout: input.options?.browser?.waitForTimeout,
       viewport: input.options?.browser?.viewport,
+      ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
     },
   };
 }
@@ -99,13 +107,16 @@ function formatOutput(result: AnalysisResult): AxeToolOutput {
 const handleAxeAnalysis = withToolContext<AxeToolInput>(
   'analyze-with-axe',
   async (input, context): Promise<ToolResponse> => {
+    const ignoreHTTPSErrors = input.options?.browser?.ignoreHTTPSErrors ?? false;
+    
     context.logger.debug('Building analysis configuration', {
       hasUrl: !!input.url,
       hasHtml: !!input.html,
       wcagLevel: input.options?.wcagLevel ?? 'AA',
+      ignoreHTTPSErrors,
     });
 
-    const adapter = getAdapter();
+    const adapter = getAdapter(ignoreHTTPSErrors);
 
     const isAvailable = await adapter.isAvailable();
     if (!isAvailable) {
@@ -161,6 +172,10 @@ const AxeToolMcpInputSchema = z.object({
               height: z.number().int().positive().default(720),
             })
             .optional(),
+          ignoreHTTPSErrors: z
+            .boolean()
+            .default(false)
+            .describe('Ignore HTTPS certificate errors (for local dev servers with self-signed certs)'),
         })
         .optional(),
     })
@@ -182,6 +197,7 @@ Input options
 - options.includeIncomplete: Include needs-review results. Default: false
 - options.browser.waitForSelector: CSS selector to wait for before analysis
 - options.browser.viewport: Browser viewport dimensions
+- options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors (for local dev servers). Default: false
 
 Output
 - issues: Array of accessibility issues found
