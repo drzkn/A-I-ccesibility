@@ -1,4 +1,8 @@
+import { createRequire } from 'module';
 import pino from 'pino';
+
+const require = createRequire(import.meta.url);
+const pkg = require("../../package.json") as { version: string };
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -17,7 +21,7 @@ const baseLogger = pino(
     level: logLevel,
     base: {
       service: 'AccesibilityHub',
-      version: '0.1.2',
+      version: pkg.version,
     },
     timestamp: pino.stdTimeFunctions.isoTime,
     formatters: {

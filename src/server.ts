@@ -1,3 +1,4 @@
+import { createRequire } from "module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { logger } from "@/utils/logger.js";
@@ -12,9 +13,12 @@ import {
   disposeAnalyzeAllAdapters
 } from "@/tools/index.js";
 
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json") as { version: string };
+
 const server = new McpServer({
   name: 'AccesibilityHub',
-  version: '0.1.2'
+  version: pkg.version
 });
 
 function registerTools(): void {
@@ -33,7 +37,7 @@ function registerTools(): void {
 
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
-    version: '0.1.2',
+    version: pkg.version,
     tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all']
   });
 
