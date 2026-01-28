@@ -1,0 +1,32 @@
+name: Validate PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Validate PR Title Contains Version Type
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title for version type
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "PR Title: $PR_TITLE"
+          
+          if echo "$PR_TITLE" | grep -qE '\b(MAJOR|MINOR|PATCH)\b'; then
+            VERSION_TYPE=$(echo "$PR_TITLE" | grep -oE '\b(MAJOR|MINOR|PATCH)\b' | head -1)
+            echo "✅ Version type found: $VERSION_TYPE"
+            exit 0
+          else
+            echo "❌ Error: PR title must contain MAJOR, MINOR, or PATCH"
+            echo ""
+            echo "Examples of valid PR titles:"
+            echo "  - 'PATCH: Fix button accessibility issue'"
+            echo "  - 'MINOR: Add new WCAG validation tool'"
+            echo "  - 'MAJOR: Breaking changes to API structure'"
+            echo ""
+            echo "Please update your PR title to include the version type."
+            exit 1
+          fi
