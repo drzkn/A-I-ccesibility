@@ -9,6 +9,7 @@ vi.mock('../src/utils/logger.js', () => {
   });
 
   return {
+    APP_VERSION: '0.0.0-test',
     logger: createMockLogger(),
     createToolLogger: () => createMockLogger(),
     createAdapterLogger: () => createMockLogger(),
