@@ -25,6 +25,10 @@ const BrowserOptionsSchema = z
       .optional()
       .describe('Time to wait in ms before analysis (max 60s)'),
     viewport: ViewportSchema.optional(),
+    ignoreHTTPSErrors: z
+      .boolean()
+      .optional()
+      .describe('Ignore HTTPS certificate errors (useful for local dev servers with self-signed certs)'),
   })
   .describe('Browser behavior options');
 

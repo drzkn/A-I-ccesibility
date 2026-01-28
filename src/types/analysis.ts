@@ -16,6 +16,7 @@ export const AnalysisTargetSchema = z.object({
           height: z.number().positive(),
         })
         .optional(),
+      ignoreHTTPSErrors: z.boolean().optional(),
     })
     .optional(),
 });

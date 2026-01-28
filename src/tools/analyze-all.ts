@@ -22,17 +22,36 @@ import {
 
 let sharedAxeAdapter: AxeAdapter | null = null;
 let sharedPa11yAdapter: Pa11yAdapter | null = null;
+let currentAxeIgnoreHTTPS = false;
+let currentPa11yIgnoreHTTPS = false;
 
-function getAxeAdapter(): AxeAdapter {
-  if (!sharedAxeAdapter) {
-    sharedAxeAdapter = new AxeAdapter({ headless: true, timeout: 30000 });
+function getAxeAdapter(ignoreHTTPSErrors = false): AxeAdapter {
+  if (!sharedAxeAdapter || currentAxeIgnoreHTTPS !== ignoreHTTPSErrors) {
+    if (sharedAxeAdapter) {
+      sharedAxeAdapter.dispose().catch(() => {});
+    }
+    sharedAxeAdapter = new AxeAdapter({ 
+      headless: true, 
+      timeout: 30000,
+      ignoreHTTPSErrors 
+    });
+    currentAxeIgnoreHTTPS = ignoreHTTPSErrors;
   }
   return sharedAxeAdapter;
 }
 
-function getPa11yAdapter(): Pa11yAdapter {
-  if (!sharedPa11yAdapter) {
-    sharedPa11yAdapter = new Pa11yAdapter({ timeout: 30000 });
+function getPa11yAdapter(ignoreHTTPSErrors = false): Pa11yAdapter {
+  if (!sharedPa11yAdapter || currentPa11yIgnoreHTTPS !== ignoreHTTPSErrors) {
+    if (sharedPa11yAdapter) {
+      sharedPa11yAdapter.dispose().catch(() => {});
+    }
+    sharedPa11yAdapter = new Pa11yAdapter({ 
+      timeout: 30000,
+      chromeLaunchConfig: {
+        ignoreHTTPSErrors
+      }
+    });
+    currentPa11yIgnoreHTTPS = ignoreHTTPSErrors;
   }
   return sharedPa11yAdapter;
 }
@@ -55,6 +74,7 @@ function buildAnalysisTarget(input: CombinedAnalysisInput): AnalysisTarget {
         waitForSelector: input.options?.browser?.waitForSelector,
         timeout: input.options?.browser?.waitForTimeout,
         viewport: input.options?.browser?.viewport,
+        ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
       },
     };
   }
@@ -66,6 +86,7 @@ function buildAnalysisTarget(input: CombinedAnalysisInput): AnalysisTarget {
       waitForSelector: input.options?.browser?.waitForSelector,
       timeout: input.options?.browser?.waitForTimeout,
       viewport: input.options?.browser?.viewport,
+      ignoreHTTPSErrors: input.options?.browser?.ignoreHTTPSErrors,
     },
   };
 }
@@ -208,12 +229,14 @@ const handleCombinedAnalysis = withToolContext<CombinedAnalysisInput>(
     const startTime = Date.now();
     const toolsToRun = input.tools ?? ['axe-core', 'pa11y'];
     const shouldDeduplicate = input.options?.deduplicateResults ?? true;
+    const ignoreHTTPSErrors = input.options?.browser?.ignoreHTTPSErrors ?? false;
 
     context.logger.info('Starting combined web analysis', {
       tools: toolsToRun,
       deduplicate: shouldDeduplicate,
       hasUrl: !!input.url,
-      hasHtml: !!input.html
+      hasHtml: !!input.html,
+      ignoreHTTPSErrors
     });
 
     const target = buildAnalysisTarget(input);
@@ -228,7 +251,7 @@ const handleCombinedAnalysis = withToolContext<CombinedAnalysisInput>(
       analysisPromises.push(
         (async () => {
           try {
-            const adapter = getAxeAdapter();
+            const adapter = getAxeAdapter(ignoreHTTPSErrors);
             const result = await adapter.analyze(target, options);
             results.push(result);
             context.logger.debug('Axe analysis completed', { issueCount: result.issues.length });
@@ -247,7 +270,7 @@ const handleCombinedAnalysis = withToolContext<CombinedAnalysisInput>(
       analysisPromises.push(
         (async () => {
           try {
-            const adapter = getPa11yAdapter();
+            const adapter = getPa11yAdapter(ignoreHTTPSErrors);
             const result = await adapter.analyze(target, options);
             results.push(result);
             context.logger.debug('Pa11y analysis completed', { issueCount: result.issues.length });
@@ -327,6 +350,10 @@ const CombinedToolMcpInputSchema = z.object({
               height: z.number().int().positive().default(720),
             })
             .optional(),
+          ignoreHTTPSErrors: z
+            .boolean()
+            .default(false)
+            .describe('Ignore HTTPS certificate errors (for local dev servers with self-signed certs)'),
         })
         .optional(),
     })
@@ -347,6 +374,7 @@ Input options:
 - options.deduplicateResults: Merge similar issues from different tools. Default: true
 - options.browser.waitForSelector: CSS selector to wait for
 - options.browser.viewport: Browser viewport dimensions
+- options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors (for local dev servers). Default: false
 
 Output:
 - issues: Combined and deduplicated accessibility issues

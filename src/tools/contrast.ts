@@ -1,9 +1,13 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { AxeAdapter } from '@/adapters/axe.js';
-import { AxeToolInputSchema, type AxeToolInput } from '@/types/tool-inputs.js';
-import type { AnalysisTarget, AnalysisOptions } from '@/types/analysis.js';
-import type { AnalysisResult } from '@/types/accessibility.js';
+import { ContrastAdapter } from '@/adapters/contrast.js';
+import {
+  ContrastToolInputSchema,
+  type ContrastToolInput,
+  type ContrastAnalysisResult,
+} from '@/types/contrast.js';
+import type { AnalysisTarget } from '@/types/analysis.js';
+import type { ContrastAdapterOptions } from '@/adapters/contrast.js';
 import {
   type ToolDefinition,
   type ToolResponse,
@@ -12,15 +16,15 @@ import {
   withToolContext,
 } from './base.js';
 
-let sharedAdapter: AxeAdapter | null = null;
+let sharedAdapter: ContrastAdapter | null = null;
 let currentIgnoreHTTPS = false;
 
-function getAdapter(ignoreHTTPSErrors = false): AxeAdapter {
+function getAdapter(ignoreHTTPSErrors = false): ContrastAdapter {
   if (!sharedAdapter || currentIgnoreHTTPS !== ignoreHTTPSErrors) {
     if (sharedAdapter) {
       sharedAdapter.dispose().catch(() => {});
     }
-    sharedAdapter = new AxeAdapter({
+    sharedAdapter = new ContrastAdapter({
       headless: true,
       timeout: 30000,
       ignoreHTTPSErrors,
@@ -45,7 +49,7 @@ process.on('SIGTERM', () => {
   disposeAdapter().finally(() => process.exit(0));
 });
 
-function buildAnalysisTarget(input: AxeToolInput): AnalysisTarget {
+function buildAnalysisTarget(input: ContrastToolInput): AnalysisTarget {
   if (input.url) {
     return {
       type: 'url',
@@ -71,48 +75,49 @@ function buildAnalysisTarget(input: AxeToolInput): AnalysisTarget {
   };
 }
 
-function buildAnalysisOptions(input: AxeToolInput): AnalysisOptions {
+function buildAnalysisOptions(input: ContrastToolInput): ContrastAdapterOptions {
   return {
     wcagLevel: input.options?.wcagLevel ?? 'AA',
-    rules: input.options?.rules,
-    excludeRules: input.options?.excludeRules,
-    includeWarnings: input.options?.includeIncomplete ?? false,
+    suggestFixes: input.options?.suggestFixes ?? true,
+    includePassingElements: input.options?.includePassingElements ?? false,
+    selector: input.options?.selector,
   };
 }
 
-interface AxeToolOutput {
+interface ContrastToolOutput {
   success: boolean;
   target: string;
+  wcagLevel: string;
   issueCount: number;
-  issues: AnalysisResult['issues'];
-  summary: AnalysisResult['summary'];
-  metadata?: AnalysisResult['metadata'] | undefined;
+  issues: ContrastAnalysisResult['issues'];
+  summary: ContrastAnalysisResult['summary'];
   duration?: number | undefined;
   error?: string | undefined;
 }
 
-function formatOutput(result: AnalysisResult): AxeToolOutput {
+function formatOutput(result: ContrastAnalysisResult): ContrastToolOutput {
   return {
     success: result.success,
     target: result.target,
+    wcagLevel: result.wcagLevel,
     issueCount: result.issues.length,
     issues: result.issues,
     summary: result.summary,
-    metadata: result.metadata,
     duration: result.duration,
     error: result.error,
   };
 }
 
-const handleAxeAnalysis = withToolContext<AxeToolInput>(
-  'analyze-with-axe',
+const handleContrastAnalysis = withToolContext<ContrastToolInput>(
+  'analyze-contrast',
   async (input, context): Promise<ToolResponse> => {
     const ignoreHTTPSErrors = input.options?.browser?.ignoreHTTPSErrors ?? false;
-    
+
     context.logger.debug('Building analysis configuration', {
       hasUrl: !!input.url,
       hasHtml: !!input.html,
       wcagLevel: input.options?.wcagLevel ?? 'AA',
+      suggestFixes: input.options?.suggestFixes ?? true,
       ignoreHTTPSErrors,
     });
 
@@ -121,16 +126,17 @@ const handleAxeAnalysis = withToolContext<AxeToolInput>(
     const isAvailable = await adapter.isAvailable();
     if (!isAvailable) {
       return createErrorResponse(
-        new Error('Axe adapter is not available. Browser may have failed to launch.')
+        new Error('Contrast adapter is not available. Browser may have failed to launch.')
       );
     }
 
     const target = buildAnalysisTarget(input);
     const options = buildAnalysisOptions(input);
 
-    context.logger.info('Starting axe-core analysis', {
+    context.logger.info('Starting contrast analysis', {
       targetType: target.type,
       target: target.type === 'url' ? target.value : '[html content]',
+      wcagLevel: options.wcagLevel,
     });
 
     const result = await adapter.analyze(target, options);
@@ -146,22 +152,27 @@ const handleAxeAnalysis = withToolContext<AxeToolInput>(
   }
 );
 
-const AxeToolMcpInputSchema = z.object({
+const ContrastToolMcpInputSchema = z.object({
   url: z.string().url().optional().describe('URL of the page to analyze'),
   html: z.string().min(1).optional().describe('Raw HTML content to analyze'),
   options: z
     .object({
       wcagLevel: z
-        .enum(['A', 'AA', 'AAA'])
+        .enum(['AA', 'AAA'])
         .default('AA')
-        .describe('WCAG conformance level to check'),
-      rules: z.array(z.string()).optional().describe('Specific axe rule IDs to run'),
-      excludeRules: z.array(z.string()).optional().describe('Axe rule IDs to exclude'),
-      includeIncomplete: z
+        .describe('WCAG conformance level: AA (4.5:1 normal, 3:1 large) or AAA (7:1 normal, 4.5:1 large)'),
+      suggestFixes: z
+        .boolean()
+        .default(true)
+        .describe('Suggest color corrections for failing elements'),
+      includePassingElements: z
         .boolean()
         .default(false)
-        .describe('Include incomplete/needs-review results'),
-      selector: z.string().optional().describe('CSS selector to scope analysis'),
+        .describe('Include elements that pass contrast requirements in results'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector to scope analysis to specific element'),
       browser: z
         .object({
           waitForSelector: z.string().optional().describe('CSS selector to wait for'),
@@ -182,35 +193,42 @@ const AxeToolMcpInputSchema = z.object({
     .optional(),
 });
 
-export const analyzeWithAxeTool: ToolDefinition = {
-  name: 'analyze-with-axe',
-  description: `Analyze a web page or HTML content for accessibility issues using axe-core.
+export const analyzeContrastTool: ToolDefinition = {
+  name: 'analyze-contrast',
+  description: `Analyze a web page or HTML content for color contrast accessibility issues.
 
-Returns accessibility violations and incomplete checks based on WCAG guidelines.
+Calculates contrast ratios between text and background colors, validates against WCAG 2.1 requirements, and suggests color corrections for failing elements.
 
 Input options
 - url: URL of the page to analyze
 - html: Raw HTML content to analyze (alternative to url)
-- options.wcagLevel: WCAG level to check (A, AA, or AAA). Default: AA
-- options.rules: Specific axe rule IDs to run
-- options.excludeRules: Axe rule IDs to exclude
-- options.includeIncomplete: Include needs-review results. Default: false
+- options.wcagLevel: WCAG level to check (AA or AAA). Default: AA
+  - AA: 4.5:1 for normal text, 3:1 for large text
+  - AAA: 7:1 for normal text, 4.5:1 for large text
+- options.suggestFixes: Generate color correction suggestions. Default: true
+- options.includePassingElements: Include passing elements in results. Default: false
+- options.selector: CSS selector to scope analysis
 - options.browser.waitForSelector: CSS selector to wait for before analysis
 - options.browser.viewport: Browser viewport dimensions
-- options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors (for local dev servers). Default: false
+- options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors. Default: false
 
 Output
-- issues: Array of accessibility issues found
-- summary: Issue counts by severity and WCAG principle
-- metadata: Tool version and browser info`,
+- issues: Array of contrast issues with detailed data
+  - contrastData: foreground/background colors, current/required ratios, suggested fixes
+- summary: Statistics by text size (normal/large) and pass/fail counts
+- wcagLevel: The WCAG level used for analysis
+
+WCAG Criteria
+- 1.4.3 Contrast (Minimum) - Level AA
+- 1.4.6 Contrast (Enhanced) - Level AAA`,
 
   register(server: McpServer): void {
     server.tool(
       this.name,
       this.description,
-      AxeToolMcpInputSchema.shape,
+      ContrastToolMcpInputSchema.shape,
       async (input): Promise<{ content: Array<{ type: 'text'; text: string }> }> => {
-        const parseResult = AxeToolInputSchema.safeParse(input);
+        const parseResult = ContrastToolInputSchema.safeParse(input);
 
         if (!parseResult.success) {
           const errors = parseResult.error.errors
@@ -220,11 +238,11 @@ Output
           return { content: response.content };
         }
 
-        const response = await handleAxeAnalysis(parseResult.data);
+        const response = await handleContrastAnalysis(parseResult.data);
         return { content: response.content };
       }
     );
   },
 };
 
-export { disposeAdapter as disposeAxeAdapter };
+export { disposeAdapter as disposeContrastAdapter };
