@@ -20,7 +20,7 @@ export const WCAGPrincipleSchema = z
 export type WCAGPrinciple = z.infer<typeof WCAGPrincipleSchema>;
 
 export const ToolSourceSchema = z
-  .enum(['axe-core', 'pa11y'])
+  .enum(['axe-core', 'pa11y', 'contrast-analyzer'])
   .describe('Source tool that detected the issue');
 export type ToolSource = z.infer<typeof ToolSourceSchema>;
 

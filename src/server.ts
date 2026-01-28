@@ -6,10 +6,12 @@ import {
   analyzeWithPa11yTool,
   analyzeWithESLintTool,
   analyzeAllTool,
+  analyzeContrastTool,
   disposeAxeAdapter,
   disposePa11yAdapter,
   disposeESLintAdapter,
-  disposeAnalyzeAllAdapters
+  disposeAnalyzeAllAdapters,
+  disposeContrastAdapter
 } from "@/tools/index.js";
 
 const server = new McpServer({
@@ -29,12 +31,15 @@ function registerTools(): void {
 
   analyzeAllTool.register(server);
   logger.info('Registered tool: analyze-all');
+
+  analyzeContrastTool.register(server);
+  logger.info('Registered tool: analyze-contrast');
 }
 
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
     version: '0.1.2',
-    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all']
+    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all', 'analyze-contrast']
   });
 
   registerTools();
@@ -52,7 +57,8 @@ async function shutdown(): Promise<void> {
     disposeAxeAdapter(),
     disposePa11yAdapter(),
     disposeESLintAdapter(),
-    disposeAnalyzeAllAdapters()
+    disposeAnalyzeAllAdapters(),
+    disposeContrastAdapter()
   ]);
 
   logger.info('All adapters disposed');

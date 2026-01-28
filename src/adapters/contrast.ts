@@ -407,7 +407,7 @@ export class ContrastAdapter extends BaseAdapter {
     return {
       id: `contrast-${index}`,
       ruleId: 'color-contrast',
-      tool: 'axe-core',
+      tool: 'contrast-analyzer',
       severity: passes ? 'minor' : severity,
       wcag,
       location,
