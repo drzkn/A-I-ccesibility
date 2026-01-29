@@ -1,6 +1,21 @@
 name: Publish to NPM
 
 on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version type (ignored if dry_run is true)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      dry_run:
+        description: 'Dry run - validate without publishing'
+        type: boolean
+        default: true
   pull_request:
     types: [closed]
     branches:
@@ -12,7 +27,7 @@ permissions:
 jobs:
   publish:
     name: Publish Package
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -24,8 +39,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,24 +50,43 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libxkbcommon0 \
+            libgbm1 \
+            libasound2t64
+
       - name: Run tests
         run: pnpm test
 
-      - name: Extract version type from PR title
+      - name: Extract version type
         id: version
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+          INPUT_VERSION_TYPE: ${{ inputs.version_type }}
+          IS_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          VERSION_TYPE=$(echo "$PR_TITLE" | grep -oE '\b(MAJOR|MINOR|PATCH)\b' | head -1)
-          
-          if [ -z "$VERSION_TYPE" ]; then
-            echo "❌ Error: No version type found in PR title"
-            exit 1
+          if [ "$IS_WORKFLOW_DISPATCH" = "true" ]; then
+            VERSION_TYPE_LOWER="$INPUT_VERSION_TYPE"
+            echo "📦 Version type (from input): $VERSION_TYPE_LOWER"
+          else
+            VERSION_TYPE=$(echo "$PR_TITLE" | grep -oE '\b(MAJOR|MINOR|PATCH)\b' | head -1)
+
+            if [ -z "$VERSION_TYPE" ]; then
+              echo "❌ Error: No version type found in PR title"
+              exit 1
+            fi
+
+            VERSION_TYPE_LOWER=$(echo "$VERSION_TYPE" | tr '[:upper:]' '[:lower:]')
+            echo "📦 Version type (from PR title): $VERSION_TYPE_LOWER"
           fi
-          
-          VERSION_TYPE_LOWER=$(echo "$VERSION_TYPE" | tr '[:upper:]' '[:lower:]')
+
           echo "version_type=$VERSION_TYPE_LOWER" >> $GITHUB_OUTPUT
-          echo "📦 Version type: $VERSION_TYPE_LOWER"
 
       - name: Configure git
         run: |
@@ -72,7 +104,37 @@ jobs:
       - name: Build package
         run: pnpm build
 
+      - name: Validate NPM token
+        run: |
+          echo "🔑 Validating NPM authentication..."
+          npm whoami
+          echo "✅ NPM token is valid"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check version doesn't exist in NPM
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          echo "📦 Checking if $PACKAGE_NAME@${{ steps.bump.outputs.new_version }} exists in NPM..."
+          if npm view "$PACKAGE_NAME@${{ steps.bump.outputs.new_version }}" version 2>/dev/null; then
+            echo "❌ Version ${{ steps.bump.outputs.new_version }} already exists in NPM"
+            exit 1
+          fi
+          echo "✅ Version ${{ steps.bump.outputs.new_version }} is available in NPM"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check tag doesn't exist
+        run: |
+          echo "🏷️ Checking if tag v${{ steps.bump.outputs.new_version }} exists..."
+          if git rev-parse "v${{ steps.bump.outputs.new_version }}" >/dev/null 2>&1; then
+            echo "❌ Tag v${{ steps.bump.outputs.new_version }} already exists in repository"
+            exit 1
+          fi
+          echo "✅ Tag v${{ steps.bump.outputs.new_version }} is available"
+
       - name: Commit and push version bump
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
         run: |
           git add package.json
           git commit -m "chore: bump version to v${{ steps.bump.outputs.new_version }}"
@@ -81,23 +143,41 @@ jobs:
           git push origin "v${{ steps.bump.outputs.new_version }}"
 
       - name: Publish to NPM
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
         run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.new_version }}
           name: v${{ steps.bump.outputs.new_version }}
           body: |
             ## Changes
-            
+
             ${{ github.event.pull_request.body }}
-            
+
             ---
             PR: #${{ github.event.pull_request.number }}
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dry run summary
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          echo "🧪 DRY RUN COMPLETED SUCCESSFULLY"
+          echo ""
+          echo "Summary:"
+          echo "  - Version type: ${{ steps.version.outputs.version_type }}"
+          echo "  - New version would be: ${{ steps.bump.outputs.new_version }}"
+          echo "  - Tests: ✅ Passed"
+          echo "  - Build: ✅ Passed"
+          echo "  - NPM token: ✅ Valid"
+          echo "  - NPM version: ✅ Available"
+          echo "  - Git tag: ✅ Available"
+          echo ""
+          echo "All validations passed. No changes were pushed and no package was published."

@@ -1,20 +1,21 @@
-name: Validate PR Title
+name: Validate PR
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    branches:
+      - master
 
 jobs:
   validate:
-    name: Validate PR Title Contains Version Type
+    name: Validate Build & Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR title for version type
+      - name: Validate PR title has version type
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           echo "PR Title: $PR_TITLE"
-          
+
           if echo "$PR_TITLE" | grep -qE '\b(MAJOR|MINOR|PATCH)\b'; then
             VERSION_TYPE=$(echo "$PR_TITLE" | grep -oE '\b(MAJOR|MINOR|PATCH)\b' | head -1)
             echo "✅ Version type found: $VERSION_TYPE"
@@ -30,3 +31,36 @@ jobs:
             echo "Please update your PR title to include the version type."
             exit 1
           fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libxkbcommon0 \
+            libgbm1 \
+            libasound2t64
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build package
+        run: pnpm build
+
