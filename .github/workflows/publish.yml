@@ -84,6 +84,12 @@ jobs:
       - name: Build package
         run: pnpm build
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chrome for Puppeteer
+        run: npx puppeteer browsers install chrome
+
       - name: Validate NPM token
         run: |
           echo "🔑 Validating NPM authentication..."
