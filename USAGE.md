@@ -22,7 +22,7 @@ Analiza la accesibilidad de https://mi-sitio.com usando todas las herramientas d
 ```
 
 **¿Qué herramienta se usará?**  
-→ `analyze-all` (axe-core + Pa11y en paralelo)
+→ `analyze-mixed` (axe-core + Pa11y en paralelo)
 
 **Resultado esperado:**
 - Issues combinados y deduplicados
@@ -58,7 +58,7 @@ Revisa este HTML para problemas de accesibilidad:
 ```
 
 **¿Qué herramienta se usará?**  
-→ `analyze-all` o `analyze-with-axe`
+→ `analyze-mixed` o `analyze-with-axe`
 
 **Issues típicos que encontrará:**
 - Falta de `<label>` asociado al input (WCAG 1.3.1)
@@ -66,24 +66,7 @@ Revisa este HTML para problemas de accesibilidad:
 
 ---
 
-### 4. Linting Estático de Componentes Vue
-
-**Prompt:**
-```
-Analiza los problemas de accesibilidad en src/components/LoginForm.vue
-```
-
-**¿Qué herramienta se usará?**  
-→ `analyze-with-eslint`
-
-**Issues típicos:**
-- `v-if` en elementos interactivos sin `tabindex`
-- Eventos `@click` sin `@keydown` equivalente
-- Imágenes sin `alt`
-
----
-
-### 5. Comparación de Herramientas
+### 4. Comparación de Herramientas
 
 **Prompt:**
 ```
@@ -92,7 +75,7 @@ Compara los resultados de axe-core y Pa11y en https://ejemplo.com
 ```
 
 **¿Qué herramienta se usará?**  
-→ `analyze-all` con campo `individualResults`
+→ `analyze-mixed` con campo `individualResults`
 
 **Útil para:**
 - Validar falsos positivos
@@ -101,7 +84,7 @@ Compara los resultados de axe-core y Pa11y en https://ejemplo.com
 
 ---
 
-### 6. Análisis de Contraste de Colores
+### 5. Análisis de Contraste de Colores
 
 **Prompt:**
 ```
@@ -178,32 +161,6 @@ Usa Pa11y para analizar https://example.com excluyendo warnings y notices
 
 ---
 
-### `analyze-with-eslint`
-
-#### Ejemplo 1: Analizar archivo único
-```
-Revisa problemas de accesibilidad en src/components/Header.vue
-```
-
-#### Ejemplo 2: Analizar directorio completo
-```
-Analiza todos los archivos Vue en src/components/ para problemas de accesibilidad
-```
-
-#### Ejemplo 3: Código inline
-```
-¿Este componente Vue tiene problemas de accesibilidad?
-<template>
-  <div @click="handleClick">Click me</div>
-</template>
-```
-
-**Issues esperados:**
-- `no-static-element-interactions`: div no interactivo con evento click
-- Falta de `role="button"` y manejo de teclado
-
----
-
 ### `analyze-contrast`
 
 #### Ejemplo 1: Análisis básico de contraste
@@ -259,7 +216,7 @@ Muéstrame el contraste de todos los elementos, incluyendo los que pasan
 
 ---
 
-### `analyze-all`
+### `analyze-mixed`
 
 #### Ejemplo 1: Análisis completo
 ```
@@ -397,27 +354,7 @@ que justifique retrasar el deploy
 
 ---
 
-### Workflow 2: Code Review de PRs
-
-```
-1. Desarrollador crea PR con cambios en componentes Vue
-2. Analizar archivos modificados con ESLint
-3. Si hay issues severity serious/critical → request changes
-4. Si solo hay warnings → aprobar con comentarios
-```
-
-**Prompt sugerido:**
-```
-Analiza estos componentes modificados en el PR:
-- src/components/PaymentForm.vue
-- src/components/AddressInput.vue
-
-¿Hay algo que deba corregirse antes de hacer merge?
-```
-
----
-
-### Workflow 3: Auditoría Periódica
+### Workflow 2: Auditoría Periódica
 
 ```
 1. Cada sprint, analizar la web de producción
@@ -434,7 +371,7 @@ del mes pasado. ¿Hemos introducido nuevos problemas?
 
 ---
 
-### Workflow 4: Formación del Equipo
+### Workflow 3: Formación del Equipo
 
 ```
 1. Analizar una página con issues variados
@@ -537,8 +474,7 @@ Analiza solo el contraste de una parte de la página:
 
 ### ¿Qué herramienta usar en CI/CD?
 
-- **Para web deployada:** `analyze-all` (cobertura máxima)
-- **Para código Vue:** `analyze-with-eslint` (rápido, sin browser)
+- **Para web deployada:** `analyze-mixed` (cobertura máxima)
 - **Para verificar colores:** `analyze-contrast` (con sugerencias de corrección)
 
 ### ¿Cómo manejar falsos positivos?

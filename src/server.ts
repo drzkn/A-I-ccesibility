@@ -1,16 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { logger, APP_VERSION } from "@/utils/logger.js";
+import { logger, APP_VERSION } from "@/shared/utils/logger.js";
 import {
   analyzeWithAxeTool,
   analyzeWithPa11yTool,
-  analyzeWithESLintTool,
-  analyzeAllTool,
+  analyzeMixedTool,
   analyzeContrastTool,
   disposeAxeAdapter,
   disposePa11yAdapter,
-  disposeESLintAdapter,
-  disposeAnalyzeAllAdapters,
+  disposeAnalyzeMixedAdapters,
   disposeContrastAdapter
 } from "@/tools/index.js";
 
@@ -26,11 +24,8 @@ function registerTools(): void {
   analyzeWithPa11yTool.register(server);
   logger.info('Registered tool: analyze-with-pa11y');
 
-  analyzeWithESLintTool.register(server);
-  logger.info('Registered tool: analyze-with-eslint');
-
-  analyzeAllTool.register(server);
-  logger.info('Registered tool: analyze-all');
+  analyzeMixedTool.register(server);
+  logger.info('Registered tool: analyze-mixed');
 
   analyzeContrastTool.register(server);
   logger.info('Registered tool: analyze-contrast');
@@ -39,7 +34,7 @@ function registerTools(): void {
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
     version: APP_VERSION,
-    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-with-eslint', 'analyze-all', 'analyze-contrast']
+    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-mixed', 'analyze-contrast']
   });
 
   registerTools();
@@ -56,8 +51,7 @@ async function shutdown(): Promise<void> {
   await Promise.all([
     disposeAxeAdapter(),
     disposePa11yAdapter(),
-    disposeESLintAdapter(),
-    disposeAnalyzeAllAdapters(),
+    disposeAnalyzeMixedAdapters(),
     disposeContrastAdapter()
   ]);
 

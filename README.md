@@ -1,6 +1,6 @@
 # AccesibilityHub
 
-Servidor MCP para orquestación de herramientas de accesibilidad web (axe-core, Pa11y, eslint-plugin-vuejs-accessibility).
+Servidor MCP para orquestación de herramientas de accesibilidad web (axe-core, Pa11y).
 
 ## 📑 Índice
 
@@ -8,9 +8,8 @@ Servidor MCP para orquestación de herramientas de accesibilidad web (axe-core, 
 - [Herramientas Disponibles](#herramientas-disponibles)
   - [analyze-with-axe](#analyze-with-axe)
   - [analyze-with-pa11y](#analyze-with-pa11y)
-  - [analyze-with-eslint](#analyze-with-eslint)
   - [analyze-contrast](#analyze-contrast)
-  - [analyze-all ⭐](#analyze-all-)
+  - [analyze-mixed ⭐](#analyze-mixed-)
 - [Contexto Humano Enriquecido ✨](#contexto-humano-enriquecido-)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Scripts](#scripts)
@@ -96,15 +95,6 @@ Analiza una página web o contenido HTML usando Pa11y.
 
 **Parámetros similares a axe**, con `options.standard` para elegir el estándar WCAG (WCAG2AA, WCAG21AA, etc.).
 
-### `analyze-with-eslint`
-
-Analiza archivos Vue.js para problemas de accesibilidad mediante análisis estático.
-
-**Parámetros:**
-- `files`: Array de rutas de archivos .vue
-- `directory`: Directorio a analizar recursivamente
-- `code`: Código Vue inline a analizar
-
 ### `analyze-contrast`
 
 Analiza una página web o contenido HTML para detectar problemas de contraste de color según WCAG 2.1.
@@ -181,7 +171,7 @@ Analiza una página web o contenido HTML para detectar problemas de contraste de
 - 1.4.3 Contraste (Mínimo) - Nivel AA
 - 1.4.6 Contraste (Mejorado) - Nivel AAA
 
-### `analyze-all` ⭐
+### `analyze-mixed` ⭐
 
 **Tool de síntesis para análisis web** que ejecuta axe-core y Pa11y en paralelo y combina los resultados.
 
@@ -197,8 +187,6 @@ Analiza una página web o contenido HTML para detectar problemas de contraste de
 - `summary.byTool`: Conteo de issues por herramienta
 - `individualResults`: Resultados completos de cada tool
 - `deduplicatedCount`: Número de duplicados eliminados
-
-**Nota:** Para análisis de código Vue, usa `analyze-with-eslint` por separado. Esta herramienta está especializada en análisis web dinámico.
 
 ## Contexto Humano Enriquecido ✨
 
@@ -224,47 +212,57 @@ Ejemplo de issue enriquecido:
 }
 ```
 
-Los datos WCAG se mantienen en `src/data/wcag-criteria.json` y son fácilmente actualizables.
+Los datos WCAG se mantienen en `src/shared/data/wcag-criteria.json` y son fácilmente actualizables.
 
 ## Estructura del Proyecto
 
 ```
 src/
-├── server.ts           # Entry point MCP
-├── data/
-│   └── wcag-criteria.json  # Base de conocimiento WCAG (10 criterios)
-├── adapters/
-│   ├── base.ts         # Clase base para adaptadores
-│   ├── axe.ts          # Adaptador axe-core con Puppeteer
-│   ├── pa11y.ts        # Adaptador Pa11y
-│   ├── eslint.ts       # Adaptador ESLint Vue a11y
-│   └── contrast.ts     # Adaptador de análisis de contraste
-├── tools/
-│   ├── base.ts         # Utilidades para tools MCP
-│   ├── axe.ts          # Tool analyze-with-axe
-│   ├── pa11y.ts        # Tool analyze-with-pa11y
-│   ├── eslint.ts       # Tool analyze-with-eslint
-│   ├── contrast.ts     # Tool analyze-contrast
-│   └── analyze-all.ts  # Tool de síntesis multi-herramienta
-├── types/              # Schemas Zod (inputs, outputs, validación)
-│   └── contrast.ts     # Tipos para análisis de contraste
-├── normalizers/        # Transformación a formato unificado
-└── utils/
-    ├── logger.ts       # Logging estructurado
-    ├── wcag-context.ts # Contexto WCAG
-    └── color-analysis/ # Utilidades de análisis de color
-        ├── contrast.ts   # Cálculo de ratios de contraste
-        ├── converters.ts # Conversión entre formatos de color
-        └── parsers.ts    # Parseo de colores CSS
+├── server.ts              # Entry point MCP
+├── shared/                # Recursos compartidos entre tools
+│   ├── adapters/          # Clase base para adaptadores
+│   ├── data/              # Base de conocimiento WCAG
+│   │   └── wcag-criteria.json
+│   ├── types/             # Tipos compartidos (accessibility, analysis)
+│   └── utils/             # Utilidades comunes
+│       ├── logger.ts      # Logging estructurado
+│       └── wcag-context.ts
+└── tools/                 # Tools MCP (estructura modular)
+    ├── index.ts           # Re-exports de todos los tools
+    ├── Base/              # Utilidades base para tools
+    │   ├── types/         # ToolDefinition, ToolResponse
+    │   └── utils/         # createTextResponse, withToolContext
+    ├── Axe/               # Tool analyze-with-axe
+    │   ├── adapters/      # AxeAdapter (puppeteer + axe-core)
+    │   ├── types/         # Schemas de input/output
+    │   ├── utils/         # Utilidades específicas
+    │   └── main.ts        # Definición del tool
+    ├── Pa11y/             # Tool analyze-with-pa11y
+    │   ├── adapters/      # Pa11yAdapter
+    │   ├── normalizers/   # Transformación de resultados
+    │   ├── types/
+    │   └── main.ts
+    ├── Contrast/          # Tool analyze-contrast
+    │   ├── adapters/      # ContrastAdapter
+    │   ├── types/         # Tipos de color y contraste
+    │   ├── utils/         # Cálculo de contraste, parsers, converters
+    │   └── main.ts
+    └── AnalyzeMixed/      # Tool analyze-mixed (multi-herramienta)
+        ├── types/
+        ├── utils/         # Deduplicación, agrupación WCAG
+        └── main.ts
 
 tests/
-├── adapters/           # Tests unitarios de adaptadores
-│   └── contrast.test.ts
-├── tools/              # Tests de integración de tools
-├── fixtures/           # HTML con problemas de accesibilidad conocidos
-├── helpers/            # Utilidades para tests (mock server, etc.)
-└── utils/
-    └── color-analysis/ # Tests de utilidades de color
+├── fixtures/              # HTML con problemas de accesibilidad conocidos
+├── helpers/               # Utilidades para tests (mock server, etc.)
+├── setup.ts               # Configuración global de tests
+└── tools/                 # Tests organizados por tool
+    ├── Axe/
+    │   ├── adapters.test.ts
+    │   └── main.test.ts
+    └── Contrast/
+        ├── adapters.test.ts
+        └── utils/         # Tests de utilidades de color
 ```
 
 ## Scripts
@@ -402,8 +400,7 @@ Una vez configurado, puedes usar prompts como:
 
 - "Analiza la accesibilidad de https://example.com con axe-core y Pa11y"
 - "Revisa este HTML para problemas de accesibilidad: `<img src='foto.jpg'>`"
-- "Analiza los archivos Vue en src/components/ para problemas de accesibilidad" (usa analyze-with-eslint)
-- "Compara los resultados de axe-core y Pa11y en mi landing page" (usa analyze-all)
+- "Compara los resultados de axe-core y Pa11y en mi landing page" (usa analyze-mixed)
 - "Verifica el contraste de colores de mi página web" (usa analyze-contrast)
 - "Analiza si los colores de texto cumplen con WCAG AAA" (usa analyze-contrast con wcagLevel: AAA)
 
@@ -460,6 +457,5 @@ Si estás desarrollando o contribuyendo al proyecto, puedes usar rutas locales e
 - `@axe-core/puppeteer` - Integración axe-core con Puppeteer
 - `axe-core` - Motor de análisis de accesibilidad
 - `pa11y` - Herramienta de testing de accesibilidad
-- `eslint` + `eslint-plugin-vuejs-accessibility` - Linting estático de Vue.js
 - `zod` - Validación de schemas
 - `pino` - Logging estructurado

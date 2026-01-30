@@ -29,12 +29,8 @@
     "isolatedModules": true,
     "baseUrl": "./src",
     "paths": {
-      "@/types/*": ["types/*"],
-      "@/tools/*": ["tools/*"],
-      "@/adapters/*": ["adapters/*"],
-      "@/normalizers/*": ["normalizers/*"],
-      "@/utils/*": ["utils/*"],
-      "@/data/*": ["data/*"]
+      "@/shared/*": ["shared/*"],
+      "@/tools/*": ["tools/*"]
     }
   },
   "include": ["src/**/*.ts"],

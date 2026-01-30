@@ -6,9 +6,8 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 - [analyze-with-axe](#analyze-with-axe)
 - [analyze-with-pa11y](#analyze-with-pa11y)
-- [analyze-with-eslint](#analyze-with-eslint)
 - [analyze-contrast](#analyze-contrast)
-- [analyze-all](#analyze-all)
+- [analyze-mixed](#analyze-mixed)
 
 ---
 
@@ -211,134 +210,6 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
     "pageTitle": "Example Domain"
   },
   "duration": 1890
-}
-```
-
----
-
-## analyze-with-eslint
-
-### Ejemplo 1: Análisis de archivo Vue
-
-**Input:**
-```json
-{
-  "files": ["src/components/LoginForm.vue"]
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "target": "src/components/LoginForm.vue",
-  "issueCount": 4,
-  "issues": [
-    {
-      "id": "eslint-vuejs-a11y:vuejs-accessibility/click-events-have-key-events:src/components/LoginForm.vue:42:15:f8a3c2",
-      "ruleId": "vuejs-accessibility/click-events-have-key-events",
-      "tool": "eslint-vuejs-a11y",
-      "severity": "serious",
-      "wcag": {
-        "criterion": "2.1.1",
-        "level": "A",
-        "principle": "operable",
-        "version": "2.1"
-      },
-      "location": {
-        "file": "src/components/LoginForm.vue",
-        "line": 42,
-        "column": 15,
-        "snippet": "<div @click=\"togglePassword\">"
-      },
-      "message": "Elements with click handlers must have corresponding key event handlers.",
-      "humanContext": "**Teclado (WCAG 2.1.1 - Nivel A)**\n\nToda funcionalidad debe ser operable mediante teclado...",
-      "suggestedActions": [
-        "Añadir manejadores de eventos de teclado (onKeyDown, onKeyPress)",
-        "Usar elementos interactivos nativos (button, a, input)"
-      ],
-      "affectedUsers": ["keyboard-only", "motor-impaired", "screen-reader"],
-      "priority": "critical",
-      "remediationEffort": "medium",
-      "confidence": 1
-    },
-    {
-      "id": "eslint-vuejs-a11y:vuejs-accessibility/form-control-has-label:src/components/LoginForm.vue:28:10:b9f2a1",
-      "ruleId": "vuejs-accessibility/form-control-has-label",
-      "tool": "eslint-vuejs-a11y",
-      "severity": "serious",
-      "wcag": {
-        "criterion": "1.3.1",
-        "level": "A",
-        "principle": "perceivable",
-        "version": "2.1"
-      },
-      "location": {
-        "file": "src/components/LoginForm.vue",
-        "line": 28,
-        "column": 10
-      },
-      "message": "A form control must have a label.",
-      "humanContext": "**Información y relaciones (WCAG 1.3.1 - Nivel A)**...",
-      "affectedUsers": ["screen-reader", "cognitive"],
-      "priority": "high",
-      "remediationEffort": "low"
-    }
-  ],
-  "summary": {
-    "total": 4,
-    "bySeverity": {
-      "critical": 0,
-      "serious": 4,
-      "moderate": 0,
-      "minor": 0
-    },
-    "byRule": {
-      "vuejs-accessibility/click-events-have-key-events": 2,
-      "vuejs-accessibility/form-control-has-label": 2
-    }
-  },
-  "duration": 450
-}
-```
-
----
-
-### Ejemplo 2: Análisis de código inline
-
-**Input:**
-```json
-{
-  "code": "<template>\n  <div>\n    <img src=\"avatar.jpg\" />\n    <div @click=\"handleClick\">Click me</div>\n  </div>\n</template>\n\n<script>\nexport default {\n  methods: {\n    handleClick() {\n      console.log('clicked');\n    }\n  }\n};\n</script>"
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "target": "inline.vue",
-  "issueCount": 2,
-  "issues": [
-    {
-      "ruleId": "vuejs-accessibility/alt-text",
-      "message": "img elements must have an alt prop...",
-      "location": {
-        "file": "inline.vue",
-        "line": 3,
-        "column": 5
-      }
-    },
-    {
-      "ruleId": "vuejs-accessibility/no-static-element-interactions",
-      "message": "Static HTML elements with event handlers require a role...",
-      "location": {
-        "file": "inline.vue",
-        "line": 4,
-        "column": 5
-      }
-    }
-  ]
 }
 ```
 
@@ -553,7 +424,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-## analyze-all
+## analyze-mixed
 
 ### Ejemplo 1: Análisis combinado básico
 
@@ -741,36 +612,21 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 }
 ```
 
-**ESLint (en código Vue):**
-```json
-{
-  "tool": "eslint-vuejs-a11y",
-  "ruleId": "vuejs-accessibility/alt-text",
-  "severity": "serious",
-  "location": {
-    "file": "src/components/Avatar.vue",
-    "line": 12,
-    "column": 8
-  },
-  "message": "img elements must have an alt prop..."
-}
-```
-
 ---
 
 ## Resumen de Diferencias
 
-| Característica | axe-core | Pa11y | ESLint | Contrast |
-|----------------|----------|-------|--------|----------|
-| **Target** | URL/HTML | URL/HTML | Archivos .vue | URL/HTML |
-| **Selector** | CSS compacto | CSS completo | Línea/columna | CSS compacto |
-| **Severidades** | 4 niveles | 3 tipos | 2 niveles | 4 niveles |
-| **Snippet** | ✅ | ✅ | ✅ | ✅ |
-| **Confidence** | ✅ | ✅ | Siempre 1 | Siempre 1 |
-| **Browser** | Puppeteer | Puppeteer | - | Puppeteer |
-| **Velocidad** | ~2-3s | ~2s | <1s | ~1-2s |
-| **Falsos positivos** | Pocos | Moderados | Muy pocos | Muy pocos |
-| **Sugerencias de fix** | - | - | - | ✅ Colores |
+| Característica | axe-core | Pa11y | Contrast |
+|----------------|----------|-------|----------|
+| **Target** | URL/HTML | URL/HTML | URL/HTML |
+| **Selector** | CSS compacto | CSS completo | CSS compacto |
+| **Severidades** | 4 niveles | 3 tipos | 4 niveles |
+| **Snippet** | ✅ | ✅ | ✅ |
+| **Confidence** | ✅ | ✅ | Siempre 1 |
+| **Browser** | Puppeteer | Puppeteer | Puppeteer |
+| **Velocidad** | ~2-3s | ~2s | ~1-2s |
+| **Falsos positivos** | Pocos | Moderados | Muy pocos |
+| **Sugerencias de fix** | - | - | ✅ Colores |
 
 ---
 
@@ -803,4 +659,4 @@ Lee los ejemplos del mundo real para entender el impacto real en usuarios.
 
 - Ver [USAGE.md](./USAGE.md) para workflows completos
 - Ver [README.md](./README.md) para configuración
-- Ver `src/data/README.md` para añadir más criterios WCAG
+- Ver `src/shared/data/README.md` para añadir más criterios WCAG
