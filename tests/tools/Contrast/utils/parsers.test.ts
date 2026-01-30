@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseColor } from '../../../src/utils/color-analysis/parsers.js';
+import { parseColor } from '../../../../src/tools/Contrast/utils/parsers.js';
 
 describe('parseColor', () => {
   describe('hex colors', () => {
@@ -52,15 +52,15 @@ describe('parseColor', () => {
     it('should parse hsl() format', () => {
       const red = parseColor('hsl(0, 100%, 50%)');
       expect(red).toBeDefined();
-      expect(red!.r).toBe(255);
-      expect(red!.g).toBe(0);
-      expect(red!.b).toBe(0);
+      expect(red?.r).toBe(255);
+      expect(red?.g).toBe(0);
+      expect(red?.b).toBe(0);
     });
 
     it('should parse hsla() format', () => {
       const result = parseColor('hsla(120, 100%, 50%, 0.5)');
       expect(result).toBeDefined();
-      expect(result!.g).toBe(255);
+      expect(result?.g).toBe(255);
     });
   });
 

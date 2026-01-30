@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-vi.mock('../src/utils/logger.js', () => {
+vi.mock('../src/shared/utils/logger.js', () => {
   const createMockLogger = () => ({
     debug: vi.fn(),
     info: vi.fn(),

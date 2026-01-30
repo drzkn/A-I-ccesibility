@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { ContrastAdapter } from '../../src/adapters/contrast.js';
-import { fixtures } from '../fixtures/html-fixtures.js';
-import type { AnalysisTarget } from '../../src/types/analysis.js';
+import { ContrastAdapter } from '../../../src/tools/Contrast/adapters/index.js';
+import { fixtures } from '../../fixtures/html-fixtures.js';
+import type { AnalysisTarget } from '../../../src/shared/types/analysis.js';
 
 describe('ContrastAdapter', () => {
   let adapter: ContrastAdapter;
@@ -87,12 +87,12 @@ describe('ContrastAdapter', () => {
         const issue = result.issues[0];
 
         expect(issue).toBeDefined();
-        expect(issue!.contrastData).toBeDefined();
-        expect(issue!.contrastData.foreground).toBeDefined();
-        expect(issue!.contrastData.background).toBeDefined();
-        expect(issue!.contrastData.currentRatio).toBeDefined();
-        expect(issue!.contrastData.requiredRatio).toBeDefined();
-        expect(typeof issue!.contrastData.isLargeText).toBe('boolean');
+        expect(issue?.contrastData).toBeDefined();
+        expect(issue?.contrastData.foreground).toBeDefined();
+        expect(issue?.contrastData.background).toBeDefined();
+        expect(issue?.contrastData.currentRatio).toBeDefined();
+        expect(issue?.contrastData.requiredRatio).toBeDefined();
+        expect(typeof issue?.contrastData.isLargeText).toBe('boolean');
       });
 
       it('should suggest color fixes for failing elements', async () => {
@@ -116,8 +116,8 @@ describe('ContrastAdapter', () => {
           const issueWithFix = failingIssues.find((i) => i.contrastData.suggestedFix);
           if (issueWithFix) {
             expect(issueWithFix.contrastData.suggestedFix).toBeDefined();
-            expect(issueWithFix.contrastData.suggestedFix!.foreground).toBeDefined();
-            expect(issueWithFix.contrastData.suggestedFix!.newRatio).toBeGreaterThanOrEqual(
+            expect(issueWithFix.contrastData.suggestedFix?.foreground).toBeDefined();
+            expect(issueWithFix.contrastData.suggestedFix?.newRatio).toBeGreaterThanOrEqual(
               issueWithFix.contrastData.requiredRatio
             );
           }
@@ -316,13 +316,13 @@ describe('ContrastAdapter', () => {
         const issue = result.issues[0];
 
         expect(issue).toBeDefined();
-        expect(issue!.id).toBeDefined();
-        expect(issue!.ruleId).toBe('color-contrast');
-        expect(issue!.tool).toBe('contrast-analyzer');
-        expect(['critical', 'serious', 'moderate', 'minor']).toContain(issue!.severity);
-        expect(issue!.location).toBeDefined();
-        expect(issue!.location.selector).toBeDefined();
-        expect(issue!.message).toBeDefined();
+        expect(issue?.id).toBeDefined();
+        expect(issue?.ruleId).toBe('color-contrast');
+        expect(issue?.tool).toBe('contrast-analyzer');
+        expect(['critical', 'serious', 'moderate', 'minor']).toContain(issue?.severity);
+        expect(issue?.location).toBeDefined();
+        expect(issue?.location.selector).toBeDefined();
+        expect(issue?.message).toBeDefined();
       });
 
       it('should include WCAG reference', async () => {
@@ -339,10 +339,10 @@ describe('ContrastAdapter', () => {
         const result = await adapter.analyze(target);
         const issue = result.issues[0];
 
-        expect(issue!.wcag).toBeDefined();
-        expect(['1.4.3', '1.4.6']).toContain(issue!.wcag!.criterion);
-        expect(['AA', 'AAA']).toContain(issue!.wcag!.level);
-        expect(issue!.wcag!.principle).toBe('perceivable');
+        expect(issue?.wcag).toBeDefined();
+        expect(['1.4.3', '1.4.6']).toContain(issue?.wcag?.criterion);
+        expect(['AA', 'AAA']).toContain(issue?.wcag?.level);
+        expect(issue?.wcag?.principle).toBe('perceivable');
       });
 
       it('should include human context for failing elements', async () => {

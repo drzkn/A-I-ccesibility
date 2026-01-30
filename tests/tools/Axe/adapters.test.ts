@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { AxeAdapter } from '../../src/adapters/axe.js';
-import { fixtures } from '../fixtures/html-fixtures.js';
-import type { AnalysisTarget, AnalysisOptions } from '../../src/types/analysis.js';
+import { AxeAdapter } from '../../../src/tools/Axe/adapters/index.js';
+import { fixtures } from '../../fixtures/html-fixtures.js';
+import type { AnalysisTarget, AnalysisOptions } from '../../../src/shared/types/analysis.js';
 
 describe('AxeAdapter', () => {
   let adapter: AxeAdapter;
@@ -59,10 +59,10 @@ describe('AxeAdapter', () => {
         expect(imageAltIssues.length).toBeGreaterThan(0);
 
         const issue = imageAltIssues[0];
-        expect(issue.tool).toBe('axe-core');
-        expect(issue.severity).toBeDefined();
-        expect(issue.location).toBeDefined();
-        expect(issue.location.selector).toBeDefined();
+        expect(issue?.tool).toBe('axe-core');
+        expect(issue?.severity).toBeDefined();
+        expect(issue?.location).toBeDefined();
+        expect(issue?.location.selector).toBeDefined();
       });
     });
 
@@ -219,8 +219,8 @@ describe('AxeAdapter', () => {
           value: fixtures.multipleIssues,
         };
 
-        const resultA = await adapter.analyze(target, { wcagLevel: 'A' });
-        const resultAA = await adapter.analyze(target, { wcagLevel: 'AA' });
+        const resultA = await adapter.analyze(target, { wcagLevel: 'A', includeWarnings: false });
+        const resultAA = await adapter.analyze(target, { wcagLevel: 'AA', includeWarnings: false });
 
         expect(resultA.success).toBe(true);
         expect(resultAA.success).toBe(true);
@@ -235,6 +235,8 @@ describe('AxeAdapter', () => {
         const resultWithRule = await adapter.analyze(target);
         const resultWithoutRule = await adapter.analyze(target, {
           excludeRules: ['html-has-lang'],
+          wcagLevel: 'AA',
+          includeWarnings: false,
         });
 
         const langIssuesWithRule = resultWithRule.issues.filter(
@@ -254,8 +256,8 @@ describe('AxeAdapter', () => {
           value: fixtures.valid,
         };
 
-        const resultWithWarnings = await adapter.analyze(target, { includeWarnings: true });
-        const resultWithoutWarnings = await adapter.analyze(target, { includeWarnings: false });
+        const resultWithWarnings = await adapter.analyze(target, { includeWarnings: true, wcagLevel: 'AA' });
+        const resultWithoutWarnings = await adapter.analyze(target, { includeWarnings: false, wcagLevel: 'AA' });
 
         expect(resultWithWarnings.success).toBe(true);
         expect(resultWithoutWarnings.success).toBe(true);
@@ -273,13 +275,13 @@ describe('AxeAdapter', () => {
         const issue = result.issues[0];
 
         expect(issue).toBeDefined();
-        expect(issue.id).toBeDefined();
-        expect(issue.ruleId).toBeDefined();
-        expect(issue.tool).toBe('axe-core');
-        expect(['critical', 'serious', 'moderate', 'minor']).toContain(issue.severity);
-        expect(issue.location).toBeDefined();
-        expect(issue.message).toBeDefined();
-        expect(typeof issue.message).toBe('string');
+        expect(issue?.id).toBeDefined();
+        expect(issue?.ruleId).toBeDefined();
+        expect(issue?.tool).toBe('axe-core');
+        expect(['critical', 'serious', 'moderate', 'minor']).toContain(issue?.severity);
+        expect(issue?.location).toBeDefined();
+        expect(issue?.message).toBeDefined();
+        expect(typeof issue?.message).toBe('string');
       });
 
       it('should include WCAG reference when available', async () => {
@@ -292,10 +294,10 @@ describe('AxeAdapter', () => {
         const issuesWithWcag = result.issues.filter((i) => i.wcag !== undefined);
 
         if (issuesWithWcag.length > 0) {
-          const wcag = issuesWithWcag[0].wcag!;
-          expect(wcag.criterion).toBeDefined();
-          expect(['A', 'AA', 'AAA']).toContain(wcag.level);
-          expect(['perceivable', 'operable', 'understandable', 'robust']).toContain(wcag.principle);
+          const wcag = issuesWithWcag[0]?.wcag;
+          expect(wcag?.criterion).toBeDefined();
+          expect(['A', 'AA', 'AAA']).toContain(wcag?.level);
+          expect(['perceivable', 'operable', 'understandable', 'robust']).toContain(wcag?.principle);
         }
       });
 
@@ -308,9 +310,9 @@ describe('AxeAdapter', () => {
         const result = await adapter.analyze(target);
         const issue = result.issues[0];
 
-        expect(issue.affectedUsers).toBeDefined();
-        expect(Array.isArray(issue.affectedUsers)).toBe(true);
-        expect(issue.affectedUsers!.length).toBeGreaterThan(0);
+        expect(issue?.affectedUsers).toBeDefined();
+        expect(Array.isArray(issue?.affectedUsers)).toBe(true);
+        expect(issue?.affectedUsers?.length).toBeGreaterThan(0);
       });
     });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { rgbToHex, rgbToHsl, hslToRgb } from '../../../src/utils/color-analysis/converters.js';
-import type { RGB } from '../../../src/types/color-analysis.js';
+import { rgbToHex, rgbToHsl, hslToRgb } from '../../../../src/tools/Contrast/utils/converters.js';
+import type { RGB } from '../../../../src/tools/Contrast/types/color-analysis.js';
 
 describe('rgbToHex', () => {
   it('should convert RGB to hex correctly', () => {

@@ -5,10 +5,9 @@ import {
   meetsWCAG,
   isLargeText,
   getRequiredRatio,
-  getWCAGContrastResult,
   suggestFixedColor,
-} from '../../../src/utils/color-analysis/contrast.js';
-import type { RGB } from '../../../src/types/color-analysis.js';
+} from '../../../../src/tools/Contrast/utils/contrast.js';
+import type { RGB } from '../../../../src/tools/Contrast/types/color-analysis.js';
 
 describe('getLuminance', () => {
   it('should return 1 for white', () => {
@@ -129,30 +128,6 @@ describe('getRequiredRatio', () => {
   it('should return correct thresholds for AAA', () => {
     expect(getRequiredRatio('AAA', false)).toBe(7.0);
     expect(getRequiredRatio('AAA', true)).toBe(4.5);
-  });
-});
-
-describe('getWCAGContrastResult', () => {
-  it('should return complete WCAG analysis for max contrast', () => {
-    const black: RGB = { r: 0, g: 0, b: 0 };
-    const white: RGB = { r: 255, g: 255, b: 255 };
-    const result = getWCAGContrastResult(black, white);
-
-    expect(result.ratio).toBeCloseTo(21, 0);
-    expect(result.meetsAA).toBe(true);
-    expect(result.meetsAAA).toBe(true);
-    expect(result.meetsAALargeText).toBe(true);
-    expect(result.meetsAAALargeText).toBe(true);
-  });
-
-  it('should return false for low contrast colors', () => {
-    const lightGray: RGB = { r: 200, g: 200, b: 200 };
-    const white: RGB = { r: 255, g: 255, b: 255 };
-    const result = getWCAGContrastResult(lightGray, white);
-
-    expect(result.ratio).toBeLessThan(4.5);
-    expect(result.meetsAA).toBe(false);
-    expect(result.meetsAAA).toBe(false);
   });
 });
 
