@@ -105,10 +105,9 @@ export function buildCombinedSummary(
     robust: 0
   };
 
-  const byTool: Record<ToolSource, number> = {
+  const byTool: Record<Exclude<ToolSource, 'contrast-analyzer'>, number> = {
     'axe-core': 0,
     'pa11y': 0,
-    'contrast-analyzer': 0,
   };
 
   const byRule: Record<string, number> = {};
@@ -120,7 +119,9 @@ export function buildCombinedSummary(
       byPrinciple[issue.wcag.principle]++;
     }
 
-    byTool[issue.tool]++;
+    if (issue.tool in byTool) {
+      byTool[issue.tool as Exclude<ToolSource, 'contrast-analyzer'>]++;
+    }
     byRule[issue.ruleId] = (byRule[issue.ruleId] ?? 0) + 1;
   }
 
