@@ -2,20 +2,6 @@
 
 Esta regla define la estructura modular que deben seguir todas las herramientas (tools) del proyecto.
 
-## Estructura General del Proyecto
-
-```
-src/
-├── server.ts
-└── tools/
-    ├── index.ts
-    ├── AnalyzeAll/
-    ├── Axe/
-    ├── Base/
-    ├── Contrast/
-    └── Pa11y/
-```
-
 ## Estructura Interna de Cada Tool
 
 Cada tool debe seguir esta estructura de carpetas:
@@ -52,7 +38,7 @@ ToolName/
 
 ### Carpetas
 - Las carpetas de tools usan **PascalCase**: `AnalyzeAll`, `Axe`, `Pa11y`
-- Las subcarpetas internas usan **kebab-case**: `adapters`, `normalizers`, `types`, `utils`, `data`
+- Las subcarpetas internas usan **PascalCase**: `adapters`, `normalizers`, `types`, `utils`, `data`
 
 ### Archivos
 - Los archivos TypeScript usan **kebab-case**: `main.ts`, `index.ts`
