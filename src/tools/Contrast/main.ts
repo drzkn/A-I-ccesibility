@@ -1,5 +1,4 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
 import { ContrastAdapter } from './adapters/index.js';
 import { ContrastToolInputSchema, type ContrastToolInput } from './types/index.js';
 import { buildAnalysisTarget, buildAnalysisOptions, formatOutput } from './utils/index.js';
@@ -10,6 +9,7 @@ import {
   createErrorResponse,
   withToolContext,
 } from '../Base/index.js';
+import { ContrastToolMcpInputSchema } from './types/input.type.js';
 
 let sharedAdapter: ContrastAdapter | null = null;
 let currentIgnoreHTTPS = false;
@@ -88,47 +88,6 @@ const handleContrastAnalysis = withToolContext<ContrastToolInput>(
   }
 );
 
-const ContrastToolMcpInputSchema = z.object({
-  url: z.string().url().optional().describe('URL of the page to analyze'),
-  html: z.string().min(1).optional().describe('Raw HTML content to analyze'),
-  options: z
-    .object({
-      wcagLevel: z
-        .enum(['AA', 'AAA'])
-        .default('AA')
-        .describe('WCAG conformance level: AA (4.5:1 normal, 3:1 large) or AAA (7:1 normal, 4.5:1 large)'),
-      suggestFixes: z
-        .boolean()
-        .default(true)
-        .describe('Suggest color corrections for failing elements'),
-      includePassingElements: z
-        .boolean()
-        .default(false)
-        .describe('Include elements that pass contrast requirements in results'),
-      selector: z
-        .string()
-        .optional()
-        .describe('CSS selector to scope analysis to specific element'),
-      browser: z
-        .object({
-          waitForSelector: z.string().optional().describe('CSS selector to wait for'),
-          waitForTimeout: z.number().int().positive().max(60000).optional(),
-          viewport: z
-            .object({
-              width: z.number().int().positive().default(1280),
-              height: z.number().int().positive().default(720),
-            })
-            .optional(),
-          ignoreHTTPSErrors: z
-            .boolean()
-            .default(false)
-            .describe('Ignore HTTPS certificate errors (for local dev servers with self-signed certs)'),
-        })
-        .optional(),
-    })
-    .optional(),
-});
-
 export const analyzeContrastTool: ToolDefinition = {
   name: 'analyze-contrast',
   description: `Analyze a web page or HTML content for color contrast accessibility issues.
@@ -138,6 +97,9 @@ Calculates contrast ratios between text and background colors, validates against
 Input options
 - url: URL of the page to analyze
 - html: Raw HTML content to analyze (alternative to url)
+- options.contrastAlgorithm: Algorithm for contrast calculation. Default: WCAG21
+  - WCAG21: Standard WCAG 2.1 contrast ratio (luminance-based)
+  - APCA: Accessible Perceptual Contrast Algorithm (WCAG 3.0 draft, experimental)
 - options.wcagLevel: WCAG level to check (AA or AAA). Default: AA
   - AA: 4.5:1 for normal text, 3:1 for large text
   - AAA: 7:1 for normal text, 4.5:1 for large text
@@ -153,10 +115,17 @@ Output
   - contrastData: foreground/background colors, current/required ratios, suggested fixes
 - summary: Statistics by text size (normal/large) and pass/fail counts
 - wcagLevel: The WCAG level used for analysis
+- contrastAlgorithm: The algorithm used for contrast calculation (WCAG21 or APCA)
 
 WCAG Criteria
 - 1.4.3 Contrast (Minimum) - Level AA
-- 1.4.6 Contrast (Enhanced) - Level AAA`,
+- 1.4.6 Contrast (Enhanced) - Level AAA
+
+APCA Thresholds (when using APCA algorithm)
+- Body text: Lc 75 minimum
+- Large text: Lc 60 minimum
+- Non-text elements: Lc 45 minimum
+Note: APCA is part of the WCAG 3.0 draft and may change in future versions.`,
 
   register(server: McpServer): void {
     server.tool(

@@ -10,14 +10,19 @@ import type {
   ContrastData,
   SuggestedFix,
   RGB,
+  ContrastAlgorithm,
 } from '../types/index.js';
 import {
   parseColor,
   getContrastRatio,
+  getAPCAContrast,
   isLargeText,
   meetsWCAG,
+  meetsAPCA,
   getRequiredRatio,
+  getRequiredAPCALightness,
   suggestFixedColor,
+  suggestFixedColorForAPCA,
   rgbToHex,
 } from '../utils/index.js';
 
@@ -30,6 +35,7 @@ export interface ContrastAdapterConfig {
 
 export interface ContrastAdapterOptions {
   wcagLevel?: ContrastWCAGLevel;
+  contrastAlgorithm?: ContrastAlgorithm;
   suggestFixes?: boolean;
   includePassingElements?: boolean;
   selector?: string;
@@ -71,6 +77,7 @@ export class ContrastAdapter {
     let page: Page | null = null;
 
     const wcagLevel = options?.wcagLevel ?? 'AA';
+    const contrastAlgorithm = options?.contrastAlgorithm ?? 'WCAG21';
     const suggestFixes = options?.suggestFixes ?? true;
     const includePassingElements = options?.includePassingElements ?? false;
     const selector = options?.selector;
@@ -89,7 +96,7 @@ export class ContrastAdapter {
 
       const extractedElements = await this.extractColorData(page, selector);
       const { issues, passingCount, failingCount, normalText, largeText } =
-        this.analyzeContrast(extractedElements, wcagLevel, suggestFixes, includePassingElements);
+        this.analyzeContrast(extractedElements, wcagLevel, contrastAlgorithm, suggestFixes, includePassingElements);
 
       const duration = Date.now() - startTime;
       this.logger.info('Contrast analysis completed', {
@@ -102,6 +109,7 @@ export class ContrastAdapter {
       return this.buildSuccessResult(
         target.value,
         wcagLevel,
+        contrastAlgorithm,
         issues,
         passingCount + failingCount,
         passingCount,
@@ -114,7 +122,7 @@ export class ContrastAdapter {
       const duration = Date.now() - startTime;
       this.logger.error('Contrast analysis failed', { error: error as Error, target: target.value });
 
-      return this.buildErrorResult(target.value, wcagLevel, error, duration);
+      return this.buildErrorResult(target.value, wcagLevel, contrastAlgorithm, error, duration);
     } finally {
       if (page) {
         await page.close().catch(() => {});
@@ -276,6 +284,7 @@ export class ContrastAdapter {
   private analyzeContrast(
     elements: ExtractedElement[],
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     suggestFixes: boolean,
     includePassingElements: boolean
   ): {
@@ -290,6 +299,8 @@ export class ContrastAdapter {
     let failingCount = 0;
     const normalText = { passing: 0, failing: 0 };
     const largeText = { passing: 0, failing: 0 };
+
+    const isAPCA = contrastAlgorithm === 'APCA';
 
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i]!;
@@ -306,10 +317,20 @@ export class ContrastAdapter {
         continue;
       }
 
-      const ratio = getContrastRatio(fgRgb, bgRgb);
       const isLarge = isLargeText(element.fontSize, element.fontWeight);
-      const requiredRatio = getRequiredRatio(wcagLevel, isLarge);
-      const passes = meetsWCAG(ratio, wcagLevel, isLarge);
+      let contrastValue: number;
+      let requiredValue: number;
+      let passes: boolean;
+
+      if (isAPCA) {
+        contrastValue = getAPCAContrast(fgRgb, bgRgb);
+        requiredValue = getRequiredAPCALightness(isLarge);
+        passes = meetsAPCA(contrastValue, isLarge ? 'large' : 'body');
+      } else {
+        contrastValue = getContrastRatio(fgRgb, bgRgb);
+        requiredValue = getRequiredRatio(wcagLevel, isLarge);
+        passes = meetsWCAG(contrastValue, wcagLevel, isLarge);
+      }
 
       if (isLarge) {
         if (passes) {
@@ -332,18 +353,22 @@ export class ContrastAdapter {
         failingCount++;
       }
 
+      const roundedValue = isAPCA
+        ? Math.round(Math.abs(contrastValue) * 10) / 10
+        : Math.round(contrastValue * 100) / 100;
+
       const contrastData: ContrastData = {
         foreground: element.foreground,
         background: element.background,
-        currentRatio: Math.round(ratio * 100) / 100,
-        requiredRatio,
+        currentRatio: roundedValue,
+        requiredRatio: requiredValue,
         isLargeText: isLarge,
         fontSize: element.fontSize,
         fontWeight: element.fontWeight,
       };
 
       if (!passes && suggestFixes) {
-        contrastData.suggestedFix = this.generateSuggestedFix(fgRgb, bgRgb, requiredRatio);
+        contrastData.suggestedFix = this.generateSuggestedFix(fgRgb, bgRgb, requiredValue, contrastAlgorithm);
       }
 
       const issue = this.createContrastIssue(
@@ -351,6 +376,7 @@ export class ContrastAdapter {
         element,
         contrastData,
         wcagLevel,
+        contrastAlgorithm,
         passes
       );
 
@@ -363,16 +389,30 @@ export class ContrastAdapter {
   private generateSuggestedFix(
     fgRgb: RGB,
     bgRgb: RGB,
-    targetRatio: number
+    targetValue: number,
+    contrastAlgorithm: ContrastAlgorithm = 'WCAG21'
   ): SuggestedFix {
-    const fixedFg = suggestFixedColor(fgRgb, bgRgb, targetRatio);
-    const newRatio = getContrastRatio(fixedFg, bgRgb);
+    const isAPCA = contrastAlgorithm === 'APCA';
+    let fixedFg: RGB;
+    let newValue: number;
 
-    return {
-      foreground: rgbToHex(fixedFg),
-      background: rgbToHex(bgRgb),
-      newRatio: Math.round(newRatio * 100) / 100,
-    };
+    if (isAPCA) {
+      fixedFg = suggestFixedColorForAPCA(fgRgb, bgRgb, targetValue);
+      newValue = getAPCAContrast(fixedFg, bgRgb);
+      return {
+        foreground: rgbToHex(fixedFg),
+        background: rgbToHex(bgRgb),
+        newRatio: Math.round(Math.abs(newValue) * 10) / 10,
+      };
+    } else {
+      fixedFg = suggestFixedColor(fgRgb, bgRgb, targetValue);
+      newValue = getContrastRatio(fixedFg, bgRgb);
+      return {
+        foreground: rgbToHex(fixedFg),
+        background: rgbToHex(bgRgb),
+        newRatio: Math.round(newValue * 100) / 100,
+      };
+    }
   }
 
   private createContrastIssue(
@@ -380,27 +420,75 @@ export class ContrastAdapter {
     element: ExtractedElement,
     contrastData: ContrastData,
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     passes: boolean
   ): ContrastIssue {
-    const severity = this.determineSeverity(contrastData.currentRatio, contrastData.requiredRatio);
-    const criterion = wcagLevel === 'AAA' ? '1.4.6' : '1.4.3';
+    const isAPCA = contrastAlgorithm === 'APCA';
+    const severity = this.determineSeverity(contrastData.currentRatio, contrastData.requiredRatio, contrastAlgorithm);
 
     const location: IssueLocation = {
       selector: element.selector,
       snippet: element.snippet,
     };
 
-    const wcag: WCAGReference = {
-      criterion,
-      level: wcagLevel === 'AAA' ? 'AAA' : 'AA',
-      principle: 'perceivable',
-      version: '2.1',
-      title: wcagLevel === 'AAA' ? 'Contrast (Enhanced)' : 'Contrast (Minimum)',
-    };
+    let message: string;
+    let humanContext: string | undefined;
+    let suggestedActions: string[] | undefined;
+    let wcag: WCAGReference;
 
-    const message = passes
-      ? `Contrast ratio ${contrastData.currentRatio}:1 meets ${wcagLevel} requirements (${contrastData.requiredRatio}:1 required for ${contrastData.isLargeText ? 'large' : 'normal'} text)`
-      : `Contrast ratio ${contrastData.currentRatio}:1 does not meet ${wcagLevel} requirements (${contrastData.requiredRatio}:1 required for ${contrastData.isLargeText ? 'large' : 'normal'} text)`;
+    if (isAPCA) {
+      wcag = {
+        criterion: '1.4.3',
+        level: 'AA',
+        principle: 'perceivable',
+        version: undefined,
+        title: 'Contrast (APCA - WCAG 3.0 Draft)',
+      };
+
+      const textType = contrastData.isLargeText ? 'large' : 'body';
+      message = passes
+        ? `APCA lightness ${contrastData.currentRatio}Lc meets requirements (${contrastData.requiredRatio}Lc required for ${textType} text)`
+        : `APCA lightness ${contrastData.currentRatio}Lc does not meet requirements (${contrastData.requiredRatio}Lc required for ${textType} text)`;
+
+      humanContext = passes
+        ? undefined
+        : `Users with low vision or color blindness may have difficulty reading this text. The current APCA lightness of ${contrastData.currentRatio}Lc is below the threshold of ${contrastData.requiredRatio}Lc.`;
+
+      suggestedActions = passes
+        ? undefined
+        : [
+            `Increase APCA lightness to at least ${contrastData.requiredRatio}Lc`,
+            contrastData.suggestedFix
+              ? `Consider using ${contrastData.suggestedFix.foreground} as the text color`
+              : 'Adjust the text or background color to increase contrast',
+          ];
+    } else {
+      const criterion = wcagLevel === 'AAA' ? '1.4.6' : '1.4.3';
+      wcag = {
+        criterion,
+        level: wcagLevel === 'AAA' ? 'AAA' : 'AA',
+        principle: 'perceivable',
+        version: '2.1',
+        title: wcagLevel === 'AAA' ? 'Contrast (Enhanced)' : 'Contrast (Minimum)',
+      };
+
+      message = passes
+        ? `Contrast ratio ${contrastData.currentRatio}:1 meets ${wcagLevel} requirements (${contrastData.requiredRatio}:1 required for ${contrastData.isLargeText ? 'large' : 'normal'} text)`
+        : `Contrast ratio ${contrastData.currentRatio}:1 does not meet ${wcagLevel} requirements (${contrastData.requiredRatio}:1 required for ${contrastData.isLargeText ? 'large' : 'normal'} text)`;
+
+      humanContext = passes
+        ? undefined
+        : `Users with low vision or color blindness may have difficulty reading this text. The current contrast of ${contrastData.currentRatio}:1 is below the ${wcagLevel} threshold of ${contrastData.requiredRatio}:1.`;
+
+      suggestedActions = passes
+        ? undefined
+        : [
+            `Increase contrast ratio to at least ${contrastData.requiredRatio}:1`,
+            contrastData.suggestedFix
+              ? `Consider using ${contrastData.suggestedFix.foreground} as the text color`
+              : 'Darken the text color or lighten the background',
+          ];
+    }
 
     return {
       id: `contrast-${index}`,
@@ -410,39 +498,49 @@ export class ContrastAdapter {
       wcag,
       location,
       message,
-      humanContext: passes
-        ? undefined
-        : `Users with low vision or color blindness may have difficulty reading this text. The current contrast of ${contrastData.currentRatio}:1 is below the ${wcagLevel} threshold of ${contrastData.requiredRatio}:1.`,
-      suggestedActions: passes
-        ? undefined
-        : [
-            `Increase contrast ratio to at least ${contrastData.requiredRatio}:1`,
-            contrastData.suggestedFix
-              ? `Consider using ${contrastData.suggestedFix.foreground} as the text color`
-              : 'Darken the text color or lighten the background',
-          ],
+      humanContext,
+      suggestedActions,
       affectedUsers: passes ? undefined : ['low-vision', 'color-blind'],
       confidence: 1,
       contrastData,
     };
   }
 
-  private determineSeverity(currentRatio: number, requiredRatio: number): Severity {
-    const deficit = requiredRatio - currentRatio;
+  private determineSeverity(
+    currentValue: number,
+    requiredValue: number,
+    contrastAlgorithm: ContrastAlgorithm = 'WCAG21'
+  ): Severity {
+    const isAPCA = contrastAlgorithm === 'APCA';
+    const current = isAPCA ? Math.abs(currentValue) : currentValue;
+    const required = Math.abs(requiredValue);
+    const deficit = required - current;
 
-    if (deficit >= 3) {
-      return 'critical';
-    } else if (deficit >= 2) {
-      return 'serious';
-    } else if (deficit >= 1) {
-      return 'moderate';
+    if (isAPCA) {
+      if (deficit >= 30) {
+        return 'critical';
+      } else if (deficit >= 20) {
+        return 'serious';
+      } else if (deficit >= 10) {
+        return 'moderate';
+      }
+      return 'minor';
+    } else {
+      if (deficit >= 3) {
+        return 'critical';
+      } else if (deficit >= 2) {
+        return 'serious';
+      } else if (deficit >= 1) {
+        return 'moderate';
+      }
+      return 'minor';
     }
-    return 'minor';
   }
 
   private buildSuccessResult(
     target: string,
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     issues: ContrastIssue[],
     total: number,
     passing: number,
@@ -457,6 +555,7 @@ export class ContrastAdapter {
       duration,
       target,
       wcagLevel,
+      contrastAlgorithm,
       issues,
       summary: {
         total,
@@ -473,6 +572,7 @@ export class ContrastAdapter {
   private buildErrorResult(
     target: string,
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     error: unknown,
     duration: number
   ): ContrastAnalysisResult {
@@ -484,6 +584,7 @@ export class ContrastAdapter {
       duration,
       target,
       wcagLevel,
+      contrastAlgorithm,
       issues: [],
       summary: {
         total: 0,

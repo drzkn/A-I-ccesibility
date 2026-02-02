@@ -1,5 +1,4 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
 import { AxeAdapter } from './adapters/index.js';
 import { AxeToolInputSchema, type AxeToolInput } from './types/index.js';
 import { buildAnalysisTarget, buildAnalysisOptions, formatOutput } from './utils/index.js';
@@ -10,6 +9,7 @@ import {
   createErrorResponse,
   withToolContext,
 } from '../Base/index.js';
+import { AxeToolMcpInputSchema } from './types/input.type.js';
 
 let sharedAdapter: AxeAdapter | null = null;
 let currentIgnoreHTTPS = false;
@@ -86,42 +86,6 @@ const handleAxeAnalysis = withToolContext<AxeToolInput>(
   }
 );
 
-const AxeToolMcpInputSchema = z.object({
-  url: z.string().url().optional().describe('URL of the page to analyze'),
-  html: z.string().min(1).optional().describe('Raw HTML content to analyze'),
-  options: z
-    .object({
-      wcagLevel: z
-        .enum(['A', 'AA', 'AAA'])
-        .default('AA')
-        .describe('WCAG conformance level to check'),
-      rules: z.array(z.string()).optional().describe('Specific axe rule IDs to run'),
-      excludeRules: z.array(z.string()).optional().describe('Axe rule IDs to exclude'),
-      includeIncomplete: z
-        .boolean()
-        .default(false)
-        .describe('Include incomplete/needs-review results'),
-      selector: z.string().optional().describe('CSS selector to scope analysis'),
-      browser: z
-        .object({
-          waitForSelector: z.string().optional().describe('CSS selector to wait for'),
-          waitForTimeout: z.number().int().positive().max(60000).optional(),
-          viewport: z
-            .object({
-              width: z.number().int().positive().default(1280),
-              height: z.number().int().positive().default(720),
-            })
-            .optional(),
-          ignoreHTTPSErrors: z
-            .boolean()
-            .default(false)
-            .describe('Ignore HTTPS certificate errors (for local dev servers with self-signed certs)'),
-        })
-        .optional(),
-    })
-    .optional(),
-});
-
 export const analyzeWithAxeTool: ToolDefinition = {
   name: 'analyze-with-axe',
   description: `Analyze a web page or HTML content for accessibility issues using axe-core.
@@ -150,17 +114,17 @@ Output
       this.description,
       AxeToolMcpInputSchema.shape,
       async (input): Promise<{ content: Array<{ type: 'text'; text: string }> }> => {
-        const parseResult = AxeToolInputSchema.safeParse(input);
+        const validator = AxeToolInputSchema.safeParse(input);
 
-        if (!parseResult.success) {
-          const errors = parseResult.error.errors
+        if (!validator.success) {
+          const errors = validator.error.errors
             .map((e) => `${e.path.join('.')}: ${e.message}`)
             .join('; ');
           const response = createErrorResponse(new Error(`Invalid input: ${errors}`));
           return { content: response.content };
         }
 
-        const response = await handleAxeAnalysis(parseResult.data);
+        const response = await handleAxeAnalysis(validator.data);
         return { content: response.content };
       }
     );

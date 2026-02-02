@@ -19,7 +19,7 @@ ToolName/
 │   ├── toolname.normalizer.ts
 │   └── index.ts
 ├── types/             # Tipos e interfaces TypeScript específicos de la tool
-│   ├── toolname.types.ts    # o múltiples archivos descriptivos
+│   ├── toolname.type.ts    # o múltiples archivos descriptivos
 │   └── index.ts
 └── utils/             # Utilidades y helpers específicos de la tool
     ├── toolname.utils.ts    # o múltiples archivos descriptivos
@@ -105,14 +105,3 @@ import { ToolConfig } from './types';
 import { formatOutput } from './utils';
 import { wcagCriteria } from './data';
 ```
-
-## Migración desde Estructura Anterior
-
-Al migrar código existente:
-
-1. Mover el contenido de `src/tools/[tool].ts` → `src/tools/[Tool]/main.ts`
-2. Mover el contenido de `src/adapters/[tool].ts` → `src/tools/[Tool]/adapters/`
-3. Mover el contenido de `src/normalizers/[tool].ts` → `src/tools/[Tool]/normalizers/`
-4. Mover types relacionados de `src/types/` → `src/tools/[Tool]/types/`
-5. Mover utils relacionados de `src/utils/` → `src/tools/[Tool]/utils/`
-6. Mover data relacionada de `src/data/` → `src/tools/[Tool]/data/`

@@ -1,1 +1,1 @@
-export * from './axe.types.js';
+export * from './axe.type.js';

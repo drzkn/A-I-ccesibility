@@ -341,7 +341,85 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 3: Análisis de sección específica
+### Ejemplo 3: Análisis con APCA (WCAG 3.0 Draft)
+
+**Input:**
+```json
+{
+  "url": "https://example.com",
+  "options": {
+    "contrastAlgorithm": "APCA"
+  }
+}
+```
+
+**Output:**
+```json
+{
+  "success": true,
+  "target": "https://example.com",
+  "wcagLevel": "AA",
+  "issueCount": 2,
+  "issues": [
+    {
+      "id": "contrast-0",
+      "ruleId": "color-contrast",
+      "tool": "contrast-analyzer",
+      "severity": "serious",
+      "wcag": {
+        "criterion": "1.4.3",
+        "level": "AA",
+        "principle": "perceivable",
+        "title": "Contrast (APCA - WCAG 3.0 Draft)"
+      },
+      "location": {
+        "selector": "p.subtitle",
+        "snippet": "<p class=\"subtitle\">Low contrast text</p>"
+      },
+      "message": "APCA lightness 52.3Lc does not meet requirements (75Lc required for body text)",
+      "humanContext": "Users with low vision or color blindness may have difficulty reading this text. The current APCA lightness of 52.3Lc is below the threshold of 75Lc.",
+      "suggestedActions": [
+        "Increase APCA lightness to at least 75Lc",
+        "Consider using #4a4a4a as the text color"
+      ],
+      "contrastData": {
+        "foreground": "rgb(140, 140, 140)",
+        "background": "rgb(255, 255, 255)",
+        "currentRatio": 52.3,
+        "requiredRatio": 75,
+        "isLargeText": false,
+        "fontSize": 16,
+        "fontWeight": 400,
+        "suggestedFix": {
+          "foreground": "#4a4a4a",
+          "background": "#ffffff",
+          "newRatio": 75.2
+        }
+      },
+      "affectedUsers": ["low-vision", "color-blind"]
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passing": 18,
+    "failing": 2,
+    "byTextSize": {
+      "normalText": { "passing": 15, "failing": 2 },
+      "largeText": { "passing": 3, "failing": 0 }
+    }
+  },
+  "duration": 1234
+}
+```
+
+**Nota sobre APCA:**
+- `currentRatio` y `requiredRatio` usan valores Lc (Lightness contrast) en lugar de ratios
+- Umbrales: texto body (75Lc), texto grande (60Lc), no-texto (45Lc)
+- APCA es más preciso perceptualmente pero aún experimental
+
+---
+
+### Ejemplo 4: Análisis de sección específica
 
 **Input:**
 ```json
@@ -356,7 +434,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 4: HTML con análisis de contraste
+### Ejemplo 5: HTML con análisis de contraste
 
 **Input:**
 ```json
@@ -627,6 +705,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 | **Velocidad** | ~2-3s | ~2s | ~1-2s |
 | **Falsos positivos** | Pocos | Moderados | Muy pocos |
 | **Sugerencias de fix** | - | - | ✅ Colores |
+| **APCA (WCAG 3.0)** | - | - | ✅ Experimental |
 
 ---
 

@@ -62,6 +62,7 @@
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@vue/compiler-sfc": "^3.5.26",
     "axe-core": "^4.11.1",
+    "colorjs.io": "^0.6.1",
     "eslint": "^9.39.2",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "pa11y": "^9.0.1",
