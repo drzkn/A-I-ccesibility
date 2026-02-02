@@ -104,6 +104,7 @@ export const ContrastAnalysisResultSchema = z
     duration: z.number().int().nonnegative().optional().describe('Analysis duration in milliseconds'),
     target: z.string().describe('URL or identifier of analyzed target'),
     wcagLevel: ContrastWCAGLevelSchema,
+    contrastAlgorithm: ContrastAlgorithmSchema.describe('Algorithm used for contrast calculation'),
     issues: z.array(ContrastIssueSchema).describe('List of contrast issues found'),
     summary: z
       .object({

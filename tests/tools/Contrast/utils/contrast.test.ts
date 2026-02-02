@@ -323,3 +323,98 @@ describe('suggestFixedColorForAPCA', () => {
     expect(newLightness).toBeGreaterThanOrEqual(60);
   });
 });
+
+describe('formatOutput', async () => {
+  const { formatOutput } = await import('../../../../src/tools/Contrast/utils/index.js');
+
+  it('should include contrastAlgorithm in output', () => {
+    const result = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      duration: 100,
+      target: 'https://example.com',
+      wcagLevel: 'AA' as const,
+      contrastAlgorithm: 'WCAG21' as const,
+      issues: [],
+      summary: { total: 0, passing: 0, failing: 0 },
+    };
+
+    const output = formatOutput(result);
+
+    expect(output.contrastAlgorithm).toBe('WCAG21');
+  });
+
+  it('should return APCA when contrastAlgorithm is APCA', () => {
+    const result = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      duration: 100,
+      target: 'https://example.com',
+      wcagLevel: 'AA' as const,
+      contrastAlgorithm: 'APCA' as const,
+      issues: [],
+      summary: { total: 0, passing: 0, failing: 0 },
+    };
+
+    const output = formatOutput(result);
+
+    expect(output.contrastAlgorithm).toBe('APCA');
+  });
+
+  it('should map all required fields correctly', () => {
+    const result = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      duration: 150,
+      target: 'https://example.com',
+      wcagLevel: 'AAA' as const,
+      contrastAlgorithm: 'WCAG21' as const,
+      issues: [],
+      summary: { total: 5, passing: 3, failing: 2 },
+    };
+
+    const output = formatOutput(result);
+
+    expect(output.success).toBe(true);
+    expect(output.target).toBe('https://example.com');
+    expect(output.wcagLevel).toBe('AAA');
+    expect(output.contrastAlgorithm).toBe('WCAG21');
+    expect(output.issueCount).toBe(0);
+    expect(output.summary).toEqual({ total: 5, passing: 3, failing: 2 });
+    expect(output.duration).toBe(150);
+  });
+});
+
+describe('buildAnalysisOptions', async () => {
+  const { buildAnalysisOptions } = await import('../../../../src/tools/Contrast/utils/index.js');
+
+  it('should default contrastAlgorithm to WCAG21', () => {
+    const input = { url: 'https://example.com' };
+
+    const options = buildAnalysisOptions(input);
+
+    expect(options.contrastAlgorithm).toBe('WCAG21');
+  });
+
+  it('should use APCA when specified', () => {
+    const input = {
+      url: 'https://example.com',
+      options: { contrastAlgorithm: 'APCA' as const },
+    };
+
+    const options = buildAnalysisOptions(input);
+
+    expect(options.contrastAlgorithm).toBe('APCA');
+  });
+
+  it('should preserve WCAG21 when explicitly set', () => {
+    const input = {
+      url: 'https://example.com',
+      options: { contrastAlgorithm: 'WCAG21' as const },
+    };
+
+    const options = buildAnalysisOptions(input);
+
+    expect(options.contrastAlgorithm).toBe('WCAG21');
+  });
+});

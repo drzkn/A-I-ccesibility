@@ -7,6 +7,7 @@ export interface ContrastToolOutput {
   success: boolean;
   target: string;
   wcagLevel: string;
+  contrastAlgorithm: string;
   issueCount: number;
   issues: ContrastAnalysisResult['issues'];
   summary: ContrastAnalysisResult['summary'];
@@ -66,6 +67,7 @@ export function formatOutput(result: ContrastAnalysisResult): ContrastToolOutput
     success: result.success,
     target: result.target,
     wcagLevel: result.wcagLevel,
+    contrastAlgorithm: result.contrastAlgorithm,
     issueCount: result.issues.length,
     issues: result.issues,
     summary: result.summary,

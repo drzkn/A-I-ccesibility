@@ -387,6 +387,57 @@ describe('ContrastAdapter', () => {
         expect(result.duration).toBeDefined();
         expect(result.duration).toBeGreaterThan(0);
         expect(result.target).toBeDefined();
+        expect(result.contrastAlgorithm).toBeDefined();
+      });
+
+      it('should return contrastAlgorithm as WCAG21 by default', async () => {
+        if (!browserAvailable) {
+          console.log('Skipping test: browser not available');
+          return;
+        }
+
+        const target: AnalysisTarget = {
+          type: 'html',
+          value: fixtures.valid,
+        };
+
+        const result = await adapter.analyze(target);
+
+        expect(result.contrastAlgorithm).toBe('WCAG21');
+      });
+
+      it('should return contrastAlgorithm as APCA when specified', async () => {
+        if (!browserAvailable) {
+          console.log('Skipping test: browser not available');
+          return;
+        }
+
+        const target: AnalysisTarget = {
+          type: 'html',
+          value: fixtures.valid,
+        };
+
+        const result = await adapter.analyze(target, { contrastAlgorithm: 'APCA' });
+
+        expect(result.contrastAlgorithm).toBe('APCA');
+      });
+
+      it('should include contrastAlgorithm in error results', async () => {
+        if (!browserAvailable) {
+          console.log('Skipping test: browser not available');
+          return;
+        }
+
+        const target: AnalysisTarget = {
+          type: 'url',
+          value: 'http://localhost:99999/nonexistent',
+          options: { timeout: 5000 },
+        };
+
+        const result = await adapter.analyze(target, { contrastAlgorithm: 'APCA' });
+
+        expect(result.success).toBe(false);
+        expect(result.contrastAlgorithm).toBe('APCA');
       });
 
       it('should include text size statistics in summary', async () => {

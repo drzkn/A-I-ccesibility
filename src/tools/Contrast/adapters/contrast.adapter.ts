@@ -109,6 +109,7 @@ export class ContrastAdapter {
       return this.buildSuccessResult(
         target.value,
         wcagLevel,
+        contrastAlgorithm,
         issues,
         passingCount + failingCount,
         passingCount,
@@ -121,7 +122,7 @@ export class ContrastAdapter {
       const duration = Date.now() - startTime;
       this.logger.error('Contrast analysis failed', { error: error as Error, target: target.value });
 
-      return this.buildErrorResult(target.value, wcagLevel, error, duration);
+      return this.buildErrorResult(target.value, wcagLevel, contrastAlgorithm, error, duration);
     } finally {
       if (page) {
         await page.close().catch(() => {});
@@ -539,6 +540,7 @@ export class ContrastAdapter {
   private buildSuccessResult(
     target: string,
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     issues: ContrastIssue[],
     total: number,
     passing: number,
@@ -553,6 +555,7 @@ export class ContrastAdapter {
       duration,
       target,
       wcagLevel,
+      contrastAlgorithm,
       issues,
       summary: {
         total,
@@ -569,6 +572,7 @@ export class ContrastAdapter {
   private buildErrorResult(
     target: string,
     wcagLevel: ContrastWCAGLevel,
+    contrastAlgorithm: ContrastAlgorithm,
     error: unknown,
     duration: number
   ): ContrastAnalysisResult {
@@ -580,6 +584,7 @@ export class ContrastAdapter {
       duration,
       target,
       wcagLevel,
+      contrastAlgorithm,
       issues: [],
       summary: {
         total: 0,
