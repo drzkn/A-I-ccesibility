@@ -76,7 +76,7 @@ jobs:
       - name: Bump version
         id: bump
         run: |
-          npm version ${{ steps.version.outputs.version_type }}
+          npm version ${{ steps.version.outputs.version_type }} --no-git-tag-version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "📦 New version: $NEW_VERSION"
