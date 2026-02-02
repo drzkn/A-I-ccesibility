@@ -101,6 +101,23 @@ Verifica si los colores de texto de https://mi-sitio.com cumplen con WCAG AA
 
 ---
 
+### 6. Análisis con APCA (WCAG 3.0 Draft)
+
+**Prompt:**
+```
+Analiza el contraste de https://mi-sitio.com usando el algoritmo APCA
+```
+
+**¿Qué herramienta se usará?**  
+→ `analyze-contrast` con `contrastAlgorithm: "APCA"`
+
+**Resultado esperado:**
+- Lightness contrast (Lc) en lugar de ratios
+- Umbrales: 75Lc (texto body), 60Lc (texto grande), 45Lc (no-texto)
+- Sugerencias de colores optimizadas para percepción visual
+
+---
+
 ## Ejemplos por Herramienta
 
 ### `analyze-with-axe`
@@ -213,6 +230,26 @@ Muéstrame el contraste de todos los elementos, incluyendo los que pasan
   }
 }
 ```
+
+#### Ejemplo 5: Análisis con APCA
+```
+Analiza el contraste usando el algoritmo APCA (más preciso para percepción visual)
+```
+
+**Input equivalente:**
+```json
+{
+  "url": "https://example.com",
+  "options": {
+    "contrastAlgorithm": "APCA"
+  }
+}
+```
+
+**Nota:** APCA usa valores de lightness (Lc) en lugar de ratios. Los umbrales son:
+- Texto body: 75Lc
+- Texto grande: 60Lc
+- Elementos no-texto: 45Lc
 
 ---
 
@@ -467,6 +504,26 @@ Analiza solo el contraste de una parte de la página:
   }
 }
 ```
+
+### 6. Análisis con APCA (WCAG 3.0 Draft)
+
+Para proyectos que quieren prepararse para WCAG 3.0:
+
+```json
+{
+  "url": "https://example.com",
+  "options": {
+    "contrastAlgorithm": "APCA",
+    "suggestFixes": true
+  }
+}
+```
+
+**Diferencias APCA vs WCAG21:**
+- **APCA** mide "lightness contrast" (Lc), más preciso perceptualmente
+- **APCA** considera la polaridad (texto claro sobre oscuro vs oscuro sobre claro)
+- **APCA** es experimental (borrador WCAG 3.0)
+- **WCAG21** sigue siendo el estándar legal/normativo actual
 
 ---
 

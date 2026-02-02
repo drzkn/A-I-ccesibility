@@ -97,7 +97,7 @@ Analiza una página web o contenido HTML usando Pa11y.
 
 ### `analyze-contrast`
 
-Analiza una página web o contenido HTML para detectar problemas de contraste de color según WCAG 2.1.
+Analiza una página web o contenido HTML para detectar problemas de contraste de color según WCAG 2.1. Soporta el algoritmo estándar WCAG 2.1 y el nuevo APCA (WCAG 3.0 draft).
 
 **Parámetros:**
 
@@ -105,6 +105,7 @@ Analiza una página web o contenido HTML para detectar problemas de contraste de
 |-----------|------|-----------|-------------|
 | `url` | string | url o html | URL de la página a analizar |
 | `html` | string | url o html | Contenido HTML raw a analizar |
+| `options.contrastAlgorithm` | "WCAG21" \| "APCA" | No | Algoritmo de contraste: WCAG21 (estándar) o APCA (WCAG 3.0 draft - experimental). Default: WCAG21 |
 | `options.wcagLevel` | "AA" \| "AAA" | No | Nivel WCAG: AA (4.5:1 normal, 3:1 grande) o AAA (7:1 normal, 4.5:1 grande). Default: AA |
 | `options.suggestFixes` | boolean | No | Sugerir correcciones de color (default: true) |
 | `options.includePassingElements` | boolean | No | Incluir elementos que pasan en los resultados (default: false) |
@@ -113,7 +114,14 @@ Analiza una página web o contenido HTML para detectar problemas de contraste de
 | `options.browser.viewport` | object | No | Dimensiones del viewport |
 | `options.browser.ignoreHTTPSErrors` | boolean | No | Ignorar errores de certificado SSL (default: false) |
 
-**Ejemplo de respuesta:**
+**Algoritmos de contraste:**
+
+| Algoritmo | Descripción | Umbrales |
+|-----------|-------------|----------|
+| **WCAG21** | Estándar actual. Usa ratios de luminancia relativa. | AA: 4.5:1 (normal), 3:1 (grande). AAA: 7:1 (normal), 4.5:1 (grande) |
+| **APCA** | Borrador WCAG 3.0. Usa perceptual lightness (Lc). Más preciso para texto. | Texto body: 75Lc, texto grande: 60Lc, elementos no-texto: 45Lc |
+
+**Ejemplo de respuesta (WCAG21):**
 
 ```json
 {
@@ -167,9 +175,66 @@ Analiza una página web o contenido HTML para detectar problemas de contraste de
 }
 ```
 
+**Ejemplo de respuesta (APCA):**
+
+```json
+{
+  "success": true,
+  "target": "https://example.com",
+  "wcagLevel": "AA",
+  "issueCount": 1,
+  "issues": [
+    {
+      "id": "contrast-0",
+      "ruleId": "color-contrast",
+      "tool": "contrast-analyzer",
+      "severity": "serious",
+      "wcag": {
+        "criterion": "1.4.3",
+        "level": "AA",
+        "principle": "perceivable",
+        "title": "Contrast (APCA - WCAG 3.0 Draft)"
+      },
+      "location": {
+        "selector": "p.subtitle",
+        "snippet": "<p class=\"subtitle\">Texto de ejemplo</p>"
+      },
+      "message": "APCA lightness 45.2Lc does not meet requirements (75Lc required for body text)",
+      "contrastData": {
+        "foreground": "rgb(150, 150, 150)",
+        "background": "rgb(255, 255, 255)",
+        "currentRatio": 45.2,
+        "requiredRatio": 75,
+        "isLargeText": false,
+        "fontSize": 16,
+        "fontWeight": 400,
+        "suggestedFix": {
+          "foreground": "#5a5a5a",
+          "background": "#ffffff",
+          "newRatio": 75.1
+        }
+      },
+      "affectedUsers": ["low-vision", "color-blind"]
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passing": 14,
+    "failing": 1
+  },
+  "duration": 1234
+}
+```
+
 **Criterios WCAG:**
 - 1.4.3 Contraste (Mínimo) - Nivel AA
 - 1.4.6 Contraste (Mejorado) - Nivel AAA
+
+**APCA (Accessible Perceptual Contrast Algorithm):**
+- Algoritmo perceptual más preciso, parte del borrador de WCAG 3.0
+- Mide "lightness contrast" (Lc) en lugar de ratios
+- Considera la dirección del contraste (texto claro sobre oscuro vs oscuro sobre claro)
+- Experimental: aún no es un estándar oficial
 
 ### `analyze-mixed` ⭐
 
@@ -403,6 +468,7 @@ Una vez configurado, puedes usar prompts como:
 - "Compara los resultados de axe-core y Pa11y en mi landing page" (usa analyze-mixed)
 - "Verifica el contraste de colores de mi página web" (usa analyze-contrast)
 - "Analiza si los colores de texto cumplen con WCAG AAA" (usa analyze-contrast con wcagLevel: AAA)
+- "Analiza el contraste usando el algoritmo APCA" (usa analyze-contrast con contrastAlgorithm: APCA)
 
 ### Desarrollo Local
 
@@ -457,5 +523,6 @@ Si estás desarrollando o contribuyendo al proyecto, puedes usar rutas locales e
 - `@axe-core/puppeteer` - Integración axe-core con Puppeteer
 - `axe-core` - Motor de análisis de accesibilidad
 - `pa11y` - Herramienta de testing de accesibilidad
+- `colorjs.io` - Librería de colores con soporte para WCAG 2.1 y APCA
 - `zod` - Validación de schemas
 - `pino` - Logging estructurado
