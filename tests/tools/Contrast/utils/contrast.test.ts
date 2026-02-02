@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getLuminance,
   getContrastRatio,
   meetsWCAG,
   isLargeText,
@@ -9,39 +8,15 @@ import {
   parseColor,
   rgbToHex,
   getAPCAContrast,
-  getContrastByAlgorithm,
   meetsAPCA,
   getRequiredAPCALightness,
   suggestFixedColorForAPCA,
-  meetsWCAGNonText,
 } from '../../../../src/tools/Contrast/utils/contrast.js';
 import type { RGB } from '../../../../src/tools/Contrast/types/colorAnalysis.type.js';
 
-describe('getLuminance', () => {
-  it('should return 1 for white', () => {
-    expect(getLuminance({ r: 255, g: 255, b: 255 })).toBeCloseTo(1, 2);
-  });
-
-  it('should return 0 for black', () => {
-    expect(getLuminance({ r: 0, g: 0, b: 0 })).toBe(0);
-  });
-
-  it('should return intermediate values for gray colors', () => {
-    const gray = getLuminance({ r: 128, g: 128, b: 128 });
-    expect(gray).toBeGreaterThan(0);
-    expect(gray).toBeLessThan(1);
-  });
-
-  it('should weight green more heavily than red and blue', () => {
-    const redLum = getLuminance({ r: 255, g: 0, b: 0 });
-    const greenLum = getLuminance({ r: 0, g: 255, b: 0 });
-    const blueLum = getLuminance({ r: 0, g: 0, b: 255 });
-
-    expect(greenLum).toBeGreaterThan(redLum);
-    expect(greenLum).toBeGreaterThan(blueLum);
-    expect(redLum).toBeGreaterThan(blueLum);
-  });
-});
+function getAverageRgb(rgb: RGB): number {
+  return (rgb.r + rgb.g + rgb.b) / 3;
+}
 
 describe('getContrastRatio', () => {
   it('should return 21 for black on white', () => {
@@ -156,10 +131,8 @@ describe('suggestFixedColor', () => {
     const white: RGB = { r: 255, g: 255, b: 255 };
 
     const fixed = suggestFixedColor(lightGray, white, 4.5);
-    const fixedLuminance = getLuminance(fixed);
-    const originalLuminance = getLuminance(lightGray);
 
-    expect(fixedLuminance).toBeLessThan(originalLuminance);
+    expect(getAverageRgb(fixed)).toBeLessThan(getAverageRgb(lightGray));
   });
 
   it('should work for colors that already meet the ratio', () => {
@@ -266,26 +239,6 @@ describe('getAPCAContrast', () => {
   });
 });
 
-describe('getContrastByAlgorithm', () => {
-  const black: RGB = { r: 0, g: 0, b: 0 };
-  const white: RGB = { r: 255, g: 255, b: 255 };
-
-  it('should use WCAG21 by default', () => {
-    const result = getContrastByAlgorithm(black, white);
-    expect(result).toBeCloseTo(21, 0);
-  });
-
-  it('should use WCAG21 when specified', () => {
-    const result = getContrastByAlgorithm(black, white, 'WCAG21');
-    expect(result).toBeCloseTo(21, 0);
-  });
-
-  it('should use APCA when specified', () => {
-    const result = getContrastByAlgorithm(black, white, 'APCA');
-    expect(Math.abs(result)).toBeGreaterThan(100);
-  });
-});
-
 describe('meetsAPCA', () => {
   describe('body text (requires Lc >= 75)', () => {
     it('should return true for high contrast', () => {
@@ -339,14 +292,6 @@ describe('getRequiredAPCALightness', () => {
   });
 });
 
-describe('meetsWCAGNonText', () => {
-  it('should require 3:1 ratio for non-text elements', () => {
-    expect(meetsWCAGNonText(3.0)).toBe(true);
-    expect(meetsWCAGNonText(4.5)).toBe(true);
-    expect(meetsWCAGNonText(2.99)).toBe(false);
-  });
-});
-
 describe('suggestFixedColorForAPCA', () => {
   it('should suggest a color that meets the target APCA lightness', () => {
     const lightGray: RGB = { r: 150, g: 150, b: 150 };
@@ -364,10 +309,8 @@ describe('suggestFixedColorForAPCA', () => {
     const white: RGB = { r: 255, g: 255, b: 255 };
 
     const fixed = suggestFixedColorForAPCA(lightGray, white, 75);
-    const fixedLuminance = getLuminance(fixed);
-    const originalLuminance = getLuminance(lightGray);
 
-    expect(fixedLuminance).toBeLessThan(originalLuminance);
+    expect(getAverageRgb(fixed)).toBeLessThan(getAverageRgb(lightGray));
   });
 
   it('should work for colors that already meet the target', () => {

@@ -1,7 +1,6 @@
 import Color from 'colorjs.io';
 import {
   type RGB,
-  type ContrastAlgorithm,
   WCAG_THRESHOLDS,
   APCA_THRESHOLDS,
 } from '../types/colorAnalysis.type.js';
@@ -36,11 +35,6 @@ export function rgbToHex(rgb: RGB): string {
   return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
 }
 
-export function getLuminance(rgb: RGB): number {
-  const color = rgbToColor(rgb);
-  return color.luminance;
-}
-
 export function getContrastRatio(fg: RGB, bg: RGB): number {
   const fgColor = rgbToColor(fg);
   const bgColor = rgbToColor(bg);
@@ -51,14 +45,6 @@ export function getAPCAContrast(fg: RGB, bg: RGB): number {
   const fgColor = rgbToColor(fg);
   const bgColor = rgbToColor(bg);
   return fgColor.contrast(bgColor, 'APCA');
-}
-
-export function getContrastByAlgorithm(
-  fg: RGB,
-  bg: RGB,
-  algorithm: ContrastAlgorithm = 'WCAG21'
-): number {
-  return algorithm === 'APCA' ? getAPCAContrast(fg, bg) : getContrastRatio(fg, bg);
 }
 
 export function meetsWCAG(ratio: number, level: 'AA' | 'AAA', isLargeText: boolean): boolean {
@@ -78,10 +64,6 @@ export function meetsAPCA(lightness: number, textType: 'body' | 'large' | 'nonTe
     case 'nonText':
       return absLightness >= APCA_THRESHOLDS.NON_TEXT;
   }
-}
-
-export function meetsWCAGNonText(ratio: number): boolean {
-  return ratio >= WCAG_THRESHOLDS.NON_TEXT;
 }
 
 export function isLargeText(fontSize: number, fontWeight: number): boolean {
