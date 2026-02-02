@@ -49,3 +49,18 @@ export const WCAG_THRESHOLDS = {
   AAA_LARGE: 4.5,
   NON_TEXT: 3.0,
 } as const;
+
+export type ContrastAlgorithm = 'WCAG21' | 'APCA';
+
+export const APCA_THRESHOLDS = {
+  BODY_TEXT: 75,
+  LARGE_TEXT: 60,
+  NON_TEXT: 45,
+} as const;
+
+export interface APCAContrastResult {
+  lightness: number;
+  meetsBodyText: boolean;
+  meetsLargeText: boolean;
+  meetsNonText: boolean;
+}

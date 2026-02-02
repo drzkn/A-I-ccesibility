@@ -5,6 +5,10 @@ export const ContrastToolMcpInputSchema = z.object({
   html: z.string().min(1).optional().describe('Raw HTML content to analyze'),
   options: z
     .object({
+      contrastAlgorithm: z
+        .enum(['WCAG21', 'APCA'])
+        .default('WCAG21')
+        .describe('Contrast algorithm: WCAG21 (standard) or APCA (WCAG 3.0 draft - experimental)'),
       wcagLevel: z
         .enum(['AA', 'AAA'])
         .default('AA')
