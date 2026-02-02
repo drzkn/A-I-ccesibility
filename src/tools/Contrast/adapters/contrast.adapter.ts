@@ -354,7 +354,7 @@ export class ContrastAdapter {
       }
 
       const roundedValue = isAPCA
-        ? Math.round(contrastValue * 10) / 10
+        ? Math.round(Math.abs(contrastValue) * 10) / 10
         : Math.round(contrastValue * 100) / 100;
 
       const contrastData: ContrastData = {
