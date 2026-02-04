@@ -1,143 +1,143 @@
-# Guía de Uso - AccesibilityHub
+# Usage Guide - AccesibilityHub
 
-Esta guía proporciona ejemplos prácticos de cómo usar las herramientas de accesibilidad desde Cursor o Claude Desktop.
+This guide provides practical examples of how to use the accessibility tools from Cursor or Claude Desktop.
 
-## Contenido
+## Contents
 
-- [Casos de Uso Comunes](#casos-de-uso-comunes)
-- [Ejemplos por Herramienta](#ejemplos-por-herramienta)
-- [Prompts Efectivos](#prompts-efectivos)
-- [Interpretación de Resultados](#interpretación-de-resultados)
-- [Workflows Recomendados](#workflows-recomendados)
-
----
-
-## Casos de Uso Comunes
-
-### 1. Auditoría Rápida de una Página Web
-
-**Prompt:**
-```
-Analiza la accesibilidad de https://mi-sitio.com usando todas las herramientas disponibles
-```
-
-**¿Qué herramienta se usará?**  
-→ `analyze-mixed` (axe-core + Pa11y en paralelo)
-
-**Resultado esperado:**
-- Issues combinados y deduplicados
-- Agrupados por criterio WCAG
-- Con contexto humano enriquecido
+- [Common Use Cases](#common-use-cases)
+- [Examples by Tool](#examples-by-tool)
+- [Effective Prompts](#effective-prompts)
+- [Interpreting Results](#interpreting-results)
+- [Recommended Workflows](#recommended-workflows)
 
 ---
 
-### 2. Análisis Profundo con una Herramienta Específica
+## Common Use Cases
+
+### 1. Quick Page Audit
 
 **Prompt:**
 ```
-Usa solo axe-core para analizar https://mi-sitio.com y dame un reporte detallado
+Analyze the accessibility of https://my-site.com using all available tools
 ```
 
-**¿Qué herramienta se usará?**  
+**Which tool will be used?**  
+→ `analyze-mixed` (axe-core + Pa11y in parallel)
+
+**Expected result:**
+- Combined and deduplicated issues
+- Grouped by WCAG criterion
+- With enriched human context
+
+---
+
+### 2. Deep Analysis with a Specific Tool
+
+**Prompt:**
+```
+Use only axe-core to analyze https://my-site.com and give me a detailed report
+```
+
+**Which tool will be used?**  
 → `analyze-with-axe`
 
-**Ventaja:**  
-Resultados más rápidos, metadata específica de axe-core.
+**Advantage:**  
+Faster results, axe-core specific metadata.
 
 ---
 
-### 3. Análisis de HTML Local o en Desarrollo
+### 3. Local or Development HTML Analysis
 
 **Prompt:**
 ```
-Revisa este HTML para problemas de accesibilidad:
+Check this HTML for accessibility issues:
 <form>
-  <input type="text" placeholder="Nombre">
-  <button>Enviar</button>
+  <input type="text" placeholder="Name">
+  <button>Submit</button>
 </form>
 ```
 
-**¿Qué herramienta se usará?**  
-→ `analyze-mixed` o `analyze-with-axe`
+**Which tool will be used?**  
+→ `analyze-mixed` or `analyze-with-axe`
 
-**Issues típicos que encontrará:**
-- Falta de `<label>` asociado al input (WCAG 1.3.1)
-- Button sin `type="submit"` explícito
-
----
-
-### 4. Comparación de Herramientas
-
-**Prompt:**
-```
-Compara los resultados de axe-core y Pa11y en https://ejemplo.com
-¿Qué diferencias encuentran?
-```
-
-**¿Qué herramienta se usará?**  
-→ `analyze-mixed` con campo `individualResults`
-
-**Útil para:**
-- Validar falsos positivos
-- Entender diferencias entre herramientas
-- Decisiones sobre qué tool usar en CI/CD
+**Typical issues it will find:**
+- Missing `<label>` associated with input (WCAG 1.3.1)
+- Button without explicit `type="submit"`
 
 ---
 
-### 5. Análisis de Contraste de Colores
+### 4. Tool Comparison
 
 **Prompt:**
 ```
-Verifica si los colores de texto de https://mi-sitio.com cumplen con WCAG AA
+Compare the results of axe-core and Pa11y on https://example.com
+What differences do they find?
 ```
 
-**¿Qué herramienta se usará?**  
+**Which tool will be used?**  
+→ `analyze-mixed` with `individualResults` field
+
+**Useful for:**
+- Validating false positives
+- Understanding differences between tools
+- Decisions about which tool to use in CI/CD
+
+---
+
+### 5. Color Contrast Analysis
+
+**Prompt:**
+```
+Check if the text colors on https://my-site.com comply with WCAG AA
+```
+
+**Which tool will be used?**  
 → `analyze-contrast`
 
-**Resultado esperado:**
-- Ratio de contraste actual vs requerido
-- Sugerencias de colores que cumplan WCAG
-- Estadísticas por tipo de texto (normal/grande)
+**Expected result:**
+- Current contrast ratio vs required
+- Color suggestions that comply with WCAG
+- Statistics by text type (normal/large)
 
 ---
 
-### 6. Análisis con APCA (WCAG 3.0 Draft)
+### 6. APCA Analysis (WCAG 3.0 Draft)
 
 **Prompt:**
 ```
-Analiza el contraste de https://mi-sitio.com usando el algoritmo APCA
+Analyze the contrast of https://my-site.com using the APCA algorithm
 ```
 
-**¿Qué herramienta se usará?**  
-→ `analyze-contrast` con `contrastAlgorithm: "APCA"`
+**Which tool will be used?**  
+→ `analyze-contrast` with `contrastAlgorithm: "APCA"`
 
-**Resultado esperado:**
-- Lightness contrast (Lc) en lugar de ratios
-- Umbrales: 75Lc (texto body), 60Lc (texto grande), 45Lc (no-texto)
-- Sugerencias de colores optimizadas para percepción visual
+**Expected result:**
+- Lightness contrast (Lc) instead of ratios
+- Thresholds: 75Lc (body text), 60Lc (large text), 45Lc (non-text)
+- Color suggestions optimized for visual perception
 
 ---
 
-## Ejemplos por Herramienta
+## Examples by Tool
 
 ### `analyze-with-axe`
 
-#### Ejemplo 1: Análisis básico
+#### Example 1: Basic analysis
 ```
-Analiza con axe-core: https://example.com
-```
-
-#### Ejemplo 2: Solo criterios WCAG AA
-```
-Analiza https://example.com con axe-core, nivel WCAG AA únicamente
+Analyze with axe-core: https://example.com
 ```
 
-#### Ejemplo 3: Esperar carga de contenido dinámico
+#### Example 2: WCAG AA criteria only
 ```
-Analiza https://spa-app.com con axe-core, esperando a que aparezca el selector #main-content
+Analyze https://example.com with axe-core, WCAG AA level only
 ```
 
-**Input equivalente:**
+#### Example 3: Wait for dynamic content to load
+```
+Analyze https://spa-app.com with axe-core, waiting for the #main-content selector to appear
+```
+
+**Equivalent input:**
 ```json
 {
   "url": "https://spa-app.com",
@@ -154,17 +154,17 @@ Analiza https://spa-app.com con axe-core, esperando a que aparezca el selector #
 
 ### `analyze-with-pa11y`
 
-#### Ejemplo 1: Análisis con warnings
+#### Example 1: Analysis with warnings
 ```
-Analiza https://example.com con Pa11y incluyendo warnings
-```
-
-#### Ejemplo 2: Solo errores críticos
-```
-Usa Pa11y para analizar https://example.com excluyendo warnings y notices
+Analyze https://example.com with Pa11y including warnings
 ```
 
-**Input equivalente:**
+#### Example 2: Critical errors only
+```
+Use Pa11y to analyze https://example.com excluding warnings and notices
+```
+
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -180,17 +180,17 @@ Usa Pa11y para analizar https://example.com excluyendo warnings y notices
 
 ### `analyze-contrast`
 
-#### Ejemplo 1: Análisis básico de contraste
+#### Example 1: Basic contrast analysis
 ```
-Verifica el contraste de colores de https://example.com
-```
-
-#### Ejemplo 2: Análisis con nivel AAA
-```
-Analiza el contraste de https://example.com con nivel WCAG AAA
+Check the color contrast of https://example.com
 ```
 
-**Input equivalente:**
+#### Example 2: Analysis with AAA level
+```
+Analyze the contrast of https://example.com with WCAG AAA level
+```
+
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -200,12 +200,12 @@ Analiza el contraste de https://example.com con nivel WCAG AAA
 }
 ```
 
-#### Ejemplo 3: Análisis de sección específica
+#### Example 3: Specific section analysis
 ```
-Verifica el contraste solo del header de mi página
+Check only the header contrast of my page
 ```
 
-**Input equivalente:**
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -216,12 +216,12 @@ Verifica el contraste solo del header de mi página
 }
 ```
 
-#### Ejemplo 4: Incluir elementos que pasan
+#### Example 4: Include passing elements
 ```
-Muéstrame el contraste de todos los elementos, incluyendo los que pasan
+Show me the contrast of all elements, including those that pass
 ```
 
-**Input equivalente:**
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -231,12 +231,12 @@ Muéstrame el contraste de todos los elementos, incluyendo los que pasan
 }
 ```
 
-#### Ejemplo 5: Análisis con APCA
+#### Example 5: APCA analysis
 ```
-Analiza el contraste usando el algoritmo APCA (más preciso para percepción visual)
+Analyze contrast using the APCA algorithm (more accurate for visual perception)
 ```
 
-**Input equivalente:**
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -246,26 +246,26 @@ Analiza el contraste usando el algoritmo APCA (más preciso para percepción vis
 }
 ```
 
-**Nota:** APCA usa valores de lightness (Lc) en lugar de ratios. Los umbrales son:
-- Texto body: 75Lc
-- Texto grande: 60Lc
-- Elementos no-texto: 45Lc
+**Note:** APCA uses lightness values (Lc) instead of ratios. Thresholds are:
+- Body text: 75Lc
+- Large text: 60Lc
+- Non-text elements: 45Lc
 
 ---
 
 ### `analyze-mixed`
 
-#### Ejemplo 1: Análisis completo
+#### Example 1: Complete analysis
 ```
-Haz un análisis completo de accesibilidad de https://mi-landing.com
-```
-
-#### Ejemplo 2: Sin deduplicación
-```
-Analiza https://example.com con axe-core y Pa11y, muéstrame TODOS los issues sin deduplicar
+Do a complete accessibility analysis of https://my-landing.com
 ```
 
-**Input equivalente:**
+#### Example 2: Without deduplication
+```
+Analyze https://example.com with axe-core and Pa11y, show me ALL issues without deduplicating
+```
+
+**Equivalent input:**
 ```json
 {
   "url": "https://example.com",
@@ -278,61 +278,61 @@ Analiza https://example.com con axe-core y Pa11y, muéstrame TODOS los issues si
 
 ---
 
-## Prompts Efectivos
+## Effective Prompts
 
-### ✅ Buenos Prompts
+### ✅ Good Prompts
 
-#### Específicos y con contexto
+#### Specific with context
 ```
-Analiza la página de checkout en https://tienda.com/checkout 
-y prioriza los issues que afecten a usuarios de lectores de pantalla
-```
-
-#### Con restricciones claras
-```
-Dame solo los issues críticos (severity: critical) de https://example.com
-que tengan esfuerzo de corrección bajo (remediationEffort: low)
+Analyze the checkout page at https://store.com/checkout 
+and prioritize issues affecting screen reader users
 ```
 
-#### Solicitan interpretación
+#### With clear constraints
 ```
-Analiza https://formulario.com y explícame cuáles son los 3 problemas
-más urgentes de resolver y por qué
-```
-
-#### Con objetivos de negocio
-```
-Vamos a lanzar la web en 2 días. Analiza https://pre-prod.com 
-y dime qué issues debo arreglar SÍ o SÍ antes del lanzamiento
+Give me only critical issues (severity: critical) from https://example.com
+that have low remediation effort (remediationEffort: low)
 ```
 
----
+#### Request interpretation
+```
+Analyze https://form.com and explain which are the 3 most
+urgent problems to solve and why
+```
 
-### ❌ Prompts Mejorables
-
-#### Demasiado vagos
+#### With business objectives
 ```
-¿Mi sitio es accesible?
+We're launching the web in 2 days. Analyze https://pre-prod.com 
+and tell me which issues I MUST fix before launch
 ```
-**Mejor:** Especifica la URL y qué aspectos te preocupan.
-
-#### Sin contexto de acción
-```
-Analiza https://example.com
-```
-**Mejor:** Añade qué quieres hacer con los resultados.
-
-#### Mezclando tipos de análisis
-```
-Analiza https://example.com y también src/components/*.vue
-```
-**Mejor:** Haz dos análisis separados (web vs código fuente).
 
 ---
 
-## Interpretación de Resultados
+### ❌ Prompts That Can Be Improved
 
-### Campos Clave en los Issues
+#### Too vague
+```
+Is my site accessible?
+```
+**Better:** Specify the URL and what aspects concern you.
+
+#### No action context
+```
+Analyze https://example.com
+```
+**Better:** Add what you want to do with the results.
+
+#### Mixing analysis types
+```
+Analyze https://example.com and also src/components/*.vue
+```
+**Better:** Do two separate analyses (web vs source code).
+
+---
+
+## Interpreting Results
+
+### Key Fields in Issues
 
 ```json
 {
@@ -349,88 +349,88 @@ Analiza https://example.com y también src/components/*.vue
 }
 ```
 
-### Cómo Priorizar
+### How to Prioritize
 
-#### Matriz de Priorización
+#### Prioritization Matrix
 
-| Priority | Effort | Acción |
+| Priority | Effort | Action |
 |----------|--------|--------|
-| **Critical** | **Low** | 🔥 **Fix inmediatamente** |
-| **Critical** | Medium/High | 📅 Planificar para próximo sprint |
-| **High** | **Low** | ✅ Quick wins - hacer pronto |
-| Medium/Low | High | 📝 Backlog - evaluar vs impacto |
+| **Critical** | **Low** | 🔥 **Fix immediately** |
+| **Critical** | Medium/High | 📅 Plan for next sprint |
+| **High** | **Low** | ✅ Quick wins - do soon |
+| Medium/Low | High | 📝 Backlog - evaluate vs impact |
 
-#### Ejemplo de Triage
+#### Triage Example
 
 **Prompt:**
 ```
-Del análisis anterior, muéstrame:
-1. Issues críticos con esfuerzo bajo (arreglar hoy)
-2. Issues high con esfuerzo bajo (arreglar esta semana)
-3. El resto agrupado por principio WCAG
+From the previous analysis, show me:
+1. Critical issues with low effort (fix today)
+2. High issues with low effort (fix this week)
+3. The rest grouped by WCAG principle
 ```
 
 ---
 
-## Workflows Recomendados
+## Recommended Workflows
 
 ### Workflow 1: Pre-Deploy Check
 
 ```
-1. Analiza https://staging.mi-app.com con todas las herramientas
-2. Filtra solo issues críticos y de alto impacto
-3. Si hay issues críticos → bloquear deploy
-4. Si solo hay issues medium/low → registrar en backlog y deployar
+1. Analyze https://staging.my-app.com with all tools
+2. Filter only critical and high impact issues
+3. If there are critical issues → block deploy
+4. If only medium/low issues → log in backlog and deploy
 ```
 
-**Prompt sugerido:**
+**Suggested prompt:**
 ```
-Analiza staging.mi-app.com y dime si hay algún issue crítico 
-que justifique retrasar el deploy
-```
-
----
-
-### Workflow 2: Auditoría Periódica
-
-```
-1. Cada sprint, analizar la web de producción
-2. Comparar con análisis anterior
-3. Identificar regresiones (nuevos issues)
-4. Priorizar fixes para próximo sprint
-```
-
-**Prompt sugerido:**
-```
-Analiza https://produccion.com y compara con el análisis 
-del mes pasado. ¿Hemos introducido nuevos problemas?
+Analyze staging.my-app.com and tell me if there are any critical issues 
+that justify delaying the deploy
 ```
 
 ---
 
-### Workflow 3: Formación del Equipo
+### Workflow 2: Periodic Audit
 
 ```
-1. Analizar una página con issues variados
-2. Revisar campo humanContext de cada issue
-3. Entender ejemplos del mundo real
-4. Aplicar soluciones sugeridas (suggestedActions)
+1. Each sprint, analyze the production website
+2. Compare with previous analysis
+3. Identify regressions (new issues)
+4. Prioritize fixes for next sprint
 ```
 
-**Prompt sugerido:**
+**Suggested prompt:**
 ```
-Analiza https://demo.com y explícame en detalle 
-el issue WCAG 1.1.1 (Contenido no textual):
-- Qué usuarios afecta
-- Ejemplo real de cómo les impacta
-- Cómo corregirlo paso a paso
+Analyze https://production.com and compare with last 
+month's analysis. Have we introduced new problems?
 ```
 
 ---
 
-## Tips Avanzados
+### Workflow 3: Team Training
 
-### 1. Análisis de SPA con Lazy Loading
+```
+1. Analyze a page with varied issues
+2. Review the humanContext field of each issue
+3. Understand real-world examples
+4. Apply suggested solutions (suggestedActions)
+```
+
+**Suggested prompt:**
+```
+Analyze https://demo.com and explain in detail 
+the WCAG 1.1.1 issue (Non-text content):
+- Which users it affects
+- Real example of how it impacts them
+- How to fix it step by step
+```
+
+---
+
+## Advanced Tips
+
+### 1. SPA Analysis with Lazy Loading
 
 ```json
 {
@@ -444,7 +444,7 @@ el issue WCAG 1.1.1 (Contenido no textual):
 }
 ```
 
-### 2. Viewport Móvil
+### 2. Mobile Viewport
 
 ```json
 {
@@ -460,9 +460,9 @@ el issue WCAG 1.1.1 (Contenido no textual):
 }
 ```
 
-### 3. Excluir Reglas Específicas
+### 3. Exclude Specific Rules
 
-Útil si tienes un falso positivo conocido:
+Useful if you have a known false positive:
 
 ```json
 {
@@ -473,9 +473,9 @@ el issue WCAG 1.1.1 (Contenido no textual):
 }
 ```
 
-### 4. Análisis de Contraste con Nivel AAA
+### 4. Contrast Analysis with AAA Level
 
-Para proyectos que requieren máxima accesibilidad:
+For projects requiring maximum accessibility:
 
 ```json
 {
@@ -487,13 +487,13 @@ Para proyectos que requieren máxima accesibilidad:
 }
 ```
 
-**Ratios requeridos:**
-- **AA:** 4.5:1 (texto normal), 3:1 (texto grande)
-- **AAA:** 7:1 (texto normal), 4.5:1 (texto grande)
+**Required ratios:**
+- **AA:** 4.5:1 (normal text), 3:1 (large text)
+- **AAA:** 7:1 (normal text), 4.5:1 (large text)
 
-### 5. Contraste de Sección Específica
+### 5. Specific Section Contrast
 
-Analiza solo el contraste de una parte de la página:
+Analyze only the contrast of a part of the page:
 
 ```json
 {
@@ -505,9 +505,9 @@ Analiza solo el contraste de una parte de la página:
 }
 ```
 
-### 6. Análisis con APCA (WCAG 3.0 Draft)
+### 6. APCA Analysis (WCAG 3.0 Draft)
 
-Para proyectos que quieren prepararse para WCAG 3.0:
+For projects wanting to prepare for WCAG 3.0:
 
 ```json
 {
@@ -519,47 +519,47 @@ Para proyectos que quieren prepararse para WCAG 3.0:
 }
 ```
 
-**Diferencias APCA vs WCAG21:**
-- **APCA** mide "lightness contrast" (Lc), más preciso perceptualmente
-- **APCA** considera la polaridad (texto claro sobre oscuro vs oscuro sobre claro)
-- **APCA** es experimental (borrador WCAG 3.0)
-- **WCAG21** sigue siendo el estándar legal/normativo actual
+**APCA vs WCAG21 differences:**
+- **APCA** measures "lightness contrast" (Lc), more perceptually accurate
+- **APCA** considers polarity (light text on dark vs dark text on light)
+- **APCA** is experimental (WCAG 3.0 draft)
+- **WCAG21** remains the current legal/regulatory standard
 
 ---
 
-## Preguntas Frecuentes
+## Frequently Asked Questions
 
-### ¿Qué herramienta usar en CI/CD?
+### Which tool to use in CI/CD?
 
-- **Para web deployada:** `analyze-mixed` (cobertura máxima)
-- **Para verificar colores:** `analyze-contrast` (con sugerencias de corrección)
+- **For deployed web:** `analyze-mixed` (maximum coverage)
+- **For color verification:** `analyze-contrast` (with fix suggestions)
 
-### ¿Cómo manejar falsos positivos?
+### How to handle false positives?
 
-1. Verifica con segunda herramienta
-2. Revisa `confidence` score (< 0.8 puede ser falso positivo)
-3. Usa `excludeRules` si es falso positivo confirmado
+1. Verify with second tool
+2. Check `confidence` score (< 0.8 may be false positive)
+3. Use `excludeRules` if confirmed false positive
 
-### ¿Puedo analizar sitios con login?
+### Can I analyze sites with login?
 
-Actualmente no. Las herramientas analizan la página pública. Para análisis autenticado, considera:
-- Configurar browser compartido con cookies
-- Usar HTML capturado post-login
+Currently no. The tools analyze the public page. For authenticated analysis, consider:
+- Configuring a shared browser with cookies
+- Using HTML captured post-login
 
 ---
 
-## Ejemplos de Respuestas Típicas
+## Typical Response Examples
 
-### Respuesta con Context Enriquecido
+### Response with Enriched Context
 
 ```json
 {
   "ruleId": "image-alt",
   "message": "Images must have alternate text",
-  "humanContext": "**Contenido no textual (WCAG 1.1.1 - Nivel A)**\n\nTodo contenido no textual debe tener una alternativa de texto que cumpla el mismo propósito.\n\n**Impacto en usuarios:**\nLos usuarios de lectores de pantalla no pueden acceder a la información transmitida por imágenes...",
+  "humanContext": "**Non-text content (WCAG 1.1.1 - Level A)**\n\nAll non-text content must have a text alternative that serves the same purpose.\n\n**Impact on users:**\nScreen reader users cannot access information conveyed by images...",
   "suggestedActions": [
-    "Añadir atributo alt descriptivo a imágenes",
-    "Usar aria-label para iconos decorativos con función"
+    "Add descriptive alt attribute to images",
+    "Use aria-label for decorative icons with function"
   ],
   "affectedUsers": ["screen-reader", "low-vision"],
   "priority": "critical",
@@ -567,7 +567,7 @@ Actualmente no. Las herramientas analizan la página pública. Para análisis au
 }
 ```
 
-### Issues Agrupados por WCAG
+### Issues Grouped by WCAG
 
 ```json
 {
@@ -585,7 +585,7 @@ Actualmente no. Las herramientas analizan la página pública. Para análisis au
 
 ---
 
-## Recursos Adicionales
+## Additional Resources
 
 - **WCAG Quick Reference:** https://www.w3.org/WAI/WCAG21/quickref/
 - **MDN Accessibility:** https://developer.mozilla.org/en-US/docs/Web/Accessibility
@@ -593,4 +593,4 @@ Actualmente no. Las herramientas analizan la página pública. Para análisis au
 
 ---
 
-¿Tienes dudas? Revisa el [README.md](./README.md) o abre un issue en el repositorio.
+Have questions? Check the [README.md](./README.md) or open an issue in the repository.

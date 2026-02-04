@@ -1,8 +1,8 @@
-# Ejemplos de Uso - AI-ccesibility
+# Usage Examples - AI-ccesibility
 
-Ejemplos concretos de inputs y outputs para cada herramienta MCP.
+Concrete input and output examples for each MCP tool.
 
-## Tabla de Contenidos
+## Table of Contents
 
 - [analyze-with-axe](#analyze-with-axe)
 - [analyze-with-pa11y](#analyze-with-pa11y)
@@ -13,7 +13,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ## analyze-with-axe
 
-### Ejemplo 1: Análisis básico de URL
+### Example 1: Basic URL analysis
 
 **Input:**
 ```json
@@ -44,11 +44,11 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
         "snippet": "<img src=\"logo.png\">"
       },
       "message": "Images must have alternate text",
-      "humanContext": "**Contenido no textual (WCAG 1.1.1 - Nivel A)**\n\nTodo contenido no textual debe tener una alternativa de texto...",
+      "humanContext": "**Non-text content (WCAG 1.1.1 - Level A)**\n\nAll non-text content must have a text alternative...",
       "suggestedActions": [
-        "Añadir atributo alt descriptivo a imágenes",
-        "Usar aria-label para iconos decorativos con función",
-        "Marcar imágenes decorativas con alt=\"\" vacío"
+        "Add descriptive alt attribute to images",
+        "Use aria-label for decorative icons with function",
+        "Mark decorative images with empty alt=\"\""
       ],
       "affectedUsers": ["screen-reader", "low-vision"],
       "priority": "critical",
@@ -77,7 +77,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 2: Análisis de HTML raw
+### Example 2: Raw HTML analysis
 
 **Input:**
 ```json
@@ -111,10 +111,10 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
         "snippet": "<input type=\"text\" placeholder=\"Email\">"
       },
       "message": "Form elements must have labels",
-      "humanContext": "**Información y relaciones (WCAG 1.3.1 - Nivel A)**...",
+      "humanContext": "**Info and Relationships (WCAG 1.3.1 - Level A)**...",
       "suggestedActions": [
-        "Asociar labels con inputs correctamente",
-        "Usar aria-label si label visible no es posible"
+        "Associate labels with inputs correctly",
+        "Use aria-label if visible label is not possible"
       ],
       "affectedUsers": ["screen-reader", "cognitive"],
       "priority": "high",
@@ -127,7 +127,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 3: Con opciones avanzadas
+### Example 3: With advanced options
 
 **Input:**
 ```json
@@ -152,7 +152,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ## analyze-with-pa11y
 
-### Ejemplo 1: Análisis con standard específico
+### Example 1: Analysis with specific standard
 
 **Input:**
 ```json
@@ -189,7 +189,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
         "snippet": "<img src=\"banner.jpg\">"
       },
       "message": "Img element missing an alt attribute. Use the alt attribute to specify a short text alternative.",
-      "humanContext": "**Contenido no textual (WCAG 1.1.1 - Nivel A)**...",
+      "humanContext": "**Non-text content (WCAG 1.1.1 - Level A)**...",
       "affectedUsers": ["screen-reader", "low-vision"],
       "priority": "critical",
       "remediationEffort": "low",
@@ -217,7 +217,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ## analyze-contrast
 
-### Ejemplo 1: Análisis básico de contraste
+### Example 1: Basic contrast analysis
 
 **Input:**
 ```json
@@ -288,7 +288,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 2: Análisis con nivel AAA
+### Example 2: Analysis with AAA level
 
 **Input:**
 ```json
@@ -341,7 +341,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 3: Análisis con APCA (WCAG 3.0 Draft)
+### Example 3: Analysis with APCA (WCAG 3.0 Draft)
 
 **Input:**
 ```json
@@ -412,14 +412,14 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 }
 ```
 
-**Nota sobre APCA:**
-- `currentRatio` y `requiredRatio` usan valores Lc (Lightness contrast) en lugar de ratios
-- Umbrales: texto body (75Lc), texto grande (60Lc), no-texto (45Lc)
-- APCA es más preciso perceptualmente pero aún experimental
+**Note about APCA:**
+- `currentRatio` and `requiredRatio` use Lc (Lightness contrast) values instead of ratios
+- Thresholds: body text (75Lc), large text (60Lc), non-text (45Lc)
+- APCA is more perceptually accurate but still experimental
 
 ---
 
-### Ejemplo 4: Análisis de sección específica
+### Example 4: Specific section analysis
 
 **Input:**
 ```json
@@ -434,7 +434,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 5: HTML con análisis de contraste
+### Example 5: HTML with contrast analysis
 
 **Input:**
 ```json
@@ -504,7 +504,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ## analyze-mixed
 
-### Ejemplo 1: Análisis combinado básico
+### Example 1: Basic combined analysis
 
 **Input:**
 ```json
@@ -533,7 +533,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
       "tool": "axe-core",
       "severity": "critical",
       "message": "Images must have alternate text",
-      "humanContext": "**Contenido no textual (WCAG 1.1.1 - Nivel A)**...",
+      "humanContext": "**Non-text content (WCAG 1.1.1 - Level A)**...",
       "affectedUsers": ["screen-reader", "low-vision"],
       "priority": "critical",
       "remediationEffort": "low"
@@ -602,7 +602,7 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-### Ejemplo 2: Sin deduplicación
+### Example 2: Without deduplication
 
 **Input:**
 ```json
@@ -635,11 +635,11 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 }
 ```
 
-**Nota:** Ambos detectaron la misma imagen sin `alt`, pero con diferentes selectores.
+**Note:** Both detected the same image without `alt`, but with different selectors.
 
 ---
 
-### Ejemplo 3: Con viewport móvil
+### Example 3: With mobile viewport
 
 **Input:**
 ```json
@@ -660,9 +660,9 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-## Comparación de Outputs por Herramienta
+## Output Comparison by Tool
 
-### Mismo Issue detectado por diferentes tools
+### Same issue detected by different tools
 
 **Axe-core:**
 ```json
@@ -692,50 +692,50 @@ Ejemplos concretos de inputs y outputs para cada herramienta MCP.
 
 ---
 
-## Resumen de Diferencias
+## Differences Summary
 
-| Característica | axe-core | Pa11y | Contrast |
-|----------------|----------|-------|----------|
+| Feature | axe-core | Pa11y | Contrast |
+|---------|----------|-------|----------|
 | **Target** | URL/HTML | URL/HTML | URL/HTML |
-| **Selector** | CSS compacto | CSS completo | CSS compacto |
-| **Severidades** | 4 niveles | 3 tipos | 4 niveles |
+| **Selector** | Compact CSS | Full CSS | Compact CSS |
+| **Severities** | 4 levels | 3 types | 4 levels |
 | **Snippet** | ✅ | ✅ | ✅ |
-| **Confidence** | ✅ | ✅ | Siempre 1 |
+| **Confidence** | ✅ | ✅ | Always 1 |
 | **Browser** | Puppeteer | Puppeteer | Puppeteer |
-| **Velocidad** | ~2-3s | ~2s | ~1-2s |
-| **Falsos positivos** | Pocos | Moderados | Muy pocos |
-| **Sugerencias de fix** | - | - | ✅ Colores |
+| **Speed** | ~2-3s | ~2s | ~1-2s |
+| **False positives** | Few | Moderate | Very few |
+| **Fix suggestions** | - | - | ✅ Colors |
 | **APCA (WCAG 3.0)** | - | - | ✅ Experimental |
 
 ---
 
-## Tips para Interpretar Resultados
+## Tips for Interpreting Results
 
-### 1. Priorizar por Matriz
+### 1. Prioritize by Matrix
 
 ```
-Critical + Low effort = Fix HOY
-Critical + Medium/High effort = Planificar sprint
+Critical + Low effort = Fix TODAY
+Critical + Medium/High effort = Plan for sprint
 High + Low effort = Quick wins
 Medium/Low + High effort = Backlog
 ```
 
-### 2. Validar Duplicados
+### 2. Validate Duplicates
 
-Si `deduplicatedCount` > `issueCount`, revisa `individualResults` para ver qué herramienta es más confiable para ese tipo de issue.
+If `deduplicatedCount` > `issueCount`, check `individualResults` to see which tool is more reliable for that type of issue.
 
-### 3. Revisar `affectedUsers`
+### 3. Review `affectedUsers`
 
-Prioriza issues que afecten a usuarios de screen readers y keyboard-only (más comunes).
+Prioritize issues that affect screen reader and keyboard-only users (most common).
 
-### 4. Aprovechar `humanContext`
+### 4. Leverage `humanContext`
 
-Lee los ejemplos del mundo real para entender el impacto real en usuarios.
+Read the real-world examples to understand the actual impact on users.
 
 ---
 
 ## Next Steps
 
-- Ver [USAGE.md](./USAGE.md) para workflows completos
-- Ver [README.md](./README.md) para configuración
-- Ver `src/shared/data/README.md` para añadir más criterios WCAG
+- See [USAGE.md](./USAGE.md) for complete workflows
+- See [README.md](./README.md) for configuration
+- See `src/shared/data/README.md` to add more WCAG criteria
