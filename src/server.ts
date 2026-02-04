@@ -11,6 +11,14 @@ import {
   disposeAnalyzeMixedAdapters,
   disposeContrastAdapter
 } from "@/tools/index.js";
+import {
+  fullAccessibilityAuditPrompt,
+  quickAccessibilityCheckPrompt,
+  contrastCheckPrompt,
+  preDeployCheckPrompt,
+  quickWinsReportPrompt,
+  explainWcagCriterionPrompt
+} from "@/prompts/index.js";
 
 const server = new McpServer({
   name: 'AccesibilityHub',
@@ -31,13 +39,38 @@ function registerTools(): void {
   logger.info('Registered tool: analyze-contrast');
 }
 
+function registerPrompts(): void {
+  const prompts = [
+    fullAccessibilityAuditPrompt,
+    quickAccessibilityCheckPrompt,
+    contrastCheckPrompt,
+    preDeployCheckPrompt,
+    quickWinsReportPrompt,
+    explainWcagCriterionPrompt
+  ];
+
+  for (const prompt of prompts) {
+    prompt.register(server);
+    logger.info(`Registered prompt: ${prompt.name}`);
+  }
+}
+
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
     version: APP_VERSION,
-    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-mixed', 'analyze-contrast']
+    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-mixed', 'analyze-contrast'],
+    prompts: [
+      'full-accessibility-audit',
+      'quick-accessibility-check',
+      'contrast-check',
+      'pre-deploy-check',
+      'quick-wins-report',
+      'explain-wcag-criterion'
+    ]
   });
 
   registerTools();
+  registerPrompts();
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

@@ -29,6 +29,8 @@ export default defineConfig({
       '@/normalizers': './src/normalizers',
       '@/utils': './src/utils',
       '@/data': './src/data',
+      '@/prompts': './src/prompts',
+      '@/shared': './src/shared',
     };
   },
 });

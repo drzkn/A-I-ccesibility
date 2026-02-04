@@ -30,7 +30,8 @@
     "baseUrl": "./src",
     "paths": {
       "@/shared/*": ["shared/*"],
-      "@/tools/*": ["tools/*"]
+      "@/tools/*": ["tools/*"],
+      "@/prompts/*": ["prompts/*"]
     }
   },
   "include": ["src/**/*.ts"],
