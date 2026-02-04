@@ -5,6 +5,9 @@ This guide provides practical examples of how to use the accessibility tools fro
 ## Contents
 
 - [Common Use Cases](#common-use-cases)
+- [MCP Prompts](#mcp-prompts)
+  - [Using Prompts](#using-prompts)
+  - [Available Prompts](#available-prompts-1)
 - [Examples by Tool](#examples-by-tool)
 - [Effective Prompts](#effective-prompts)
 - [Interpreting Results](#interpreting-results)
@@ -115,6 +118,179 @@ Analyze the contrast of https://my-site.com using the APCA algorithm
 - Lightness contrast (Lc) instead of ratios
 - Thresholds: 75Lc (body text), 60Lc (large text), 45Lc (non-text)
 - Color suggestions optimized for visual perception
+
+---
+
+## MCP Prompts
+
+MCP Prompts are **user-controlled templates** that generate structured messages for accessibility workflows. Unlike tools (which the LLM executes automatically), prompts are invoked directly by users and provide guided analysis with detailed output formats.
+
+### Using Prompts
+
+#### In Claude Desktop
+
+1. Click the **prompts icon** (📝) in the input area
+2. Select the desired prompt from the list
+3. Fill in the required arguments (URL, etc.)
+4. Submit to start the analysis
+
+#### In Cursor
+
+1. Use the **slash command** format: `/full-accessibility-audit`
+2. Or access via the MCP prompts panel
+3. Provide the required arguments when prompted
+
+---
+
+### Available Prompts
+
+#### `full-accessibility-audit`
+
+**Best for:** Comprehensive audits before major releases or compliance reviews.
+
+**Arguments:**
+- `url` (required): URL of the page to analyze
+- `wcagLevel` (optional): A, AA, or AAA (default: AA)
+
+**Example usage:**
+```
+Use the full-accessibility-audit prompt with:
+- url: https://my-site.com
+- wcagLevel: AA
+```
+
+**Output includes:**
+- Executive summary with severity breakdown
+- Issues grouped by WCAG principle
+- Critical issues with user impact analysis
+- Prioritized remediation plan with code examples
+
+---
+
+#### `quick-accessibility-check`
+
+**Best for:** Quick sanity checks during development or CI/CD pipelines.
+
+**Arguments:**
+- `url` (required): URL of the page to analyze
+
+**Example usage:**
+```
+Use the quick-accessibility-check prompt for https://staging.my-site.com
+```
+
+**Output includes:**
+- Concise summary of issues by severity
+- Critical and serious issues with quick fixes
+- Recommendations for next steps
+
+---
+
+#### `contrast-check`
+
+**Best for:** Focused color contrast analysis, design reviews, or APCA evaluation.
+
+**Arguments:**
+- `url` (required): URL of the page to analyze
+- `selector` (optional): CSS selector to scope analysis (e.g., `header`, `.hero-section`)
+- `algorithm` (optional): WCAG21 (standard) or APCA (experimental)
+- `wcagLevel` (optional): AA or AAA (default: AA)
+- `language` (optional): Language for the report (e.g., "Spanish", "French")
+
+**Example usage:**
+```
+Use the contrast-check prompt with:
+- url: https://my-site.com
+- algorithm: APCA
+- selector: .main-content
+```
+
+**Output includes:**
+- Pass/fail statistics by text size
+- Detailed failing elements with current vs required ratios
+- Suggested color fixes with CSS code snippets
+- Implementation guide with best practices
+
+---
+
+#### `pre-deploy-check`
+
+**Best for:** Deployment gates, release checklists, and compliance verification.
+
+**Arguments:**
+- `url` (required): URL of the staging/pre-production page
+
+**Example usage:**
+```
+Use the pre-deploy-check prompt for https://staging.my-app.com
+```
+
+**Output includes:**
+- Clear **GO/NO-GO** deployment decision
+- ✅ **GO** - No critical issues
+- ⚠️ **GO WITH CAUTION** - Minor issues exist
+- ❌ **NO-GO** - Critical issues must be fixed
+- Blocking vs non-blocking issues
+- WCAG 2.1 Level AA compliance status
+- Risk assessment and action items
+
+---
+
+#### `quick-wins-report`
+
+**Best for:** Sprint planning, identifying low-hanging fruit, quick improvements.
+
+**Arguments:**
+- `url` (required): URL of the page to analyze
+
+**Example usage:**
+```
+Use the quick-wins-report prompt for https://my-landing-page.com
+```
+
+**Output includes:**
+- Priority-ordered list of high-impact, low-effort fixes
+- Time estimates for each fix
+- Before/after code examples
+- Copyable implementation checklist
+- Estimated accessibility score improvement
+
+---
+
+#### `explain-wcag-criterion`
+
+**Best for:** Learning, documentation, team training, understanding specific WCAG requirements.
+
+**Arguments:**
+- `criterion` (required): WCAG criterion ID (e.g., 1.1.1, 2.4.4, 1.4.3)
+
+**Example usage:**
+```
+Use the explain-wcag-criterion prompt with criterion: 1.4.3
+```
+
+**Output includes:**
+- Deep dive into the criterion meaning
+- Why it matters for accessibility
+- Code examples (before/after)
+- Testing strategies (manual and automated)
+- Common mistakes to avoid
+- Links to official WCAG documentation
+
+---
+
+### Prompts vs Tools: When to Use Each
+
+| Scenario | Use Prompt | Use Tool Directly |
+|----------|------------|-------------------|
+| Comprehensive audit with structured report | ✅ `full-accessibility-audit` | |
+| Deployment gate with GO/NO-GO decision | ✅ `pre-deploy-check` | |
+| Quick check during development | ✅ `quick-accessibility-check` | |
+| Focused contrast analysis with fixes | ✅ `contrast-check` | |
+| Learning about WCAG criteria | ✅ `explain-wcag-criterion` | |
+| Custom analysis with specific options | | ✅ Use tools directly |
+| Automated scripts or CI/CD | | ✅ Use tools directly |
+| Comparing tool outputs | | ✅ `analyze-mixed` |
 
 ---
 
@@ -383,7 +559,14 @@ From the previous analysis, show me:
 4. If only medium/low issues → log in backlog and deploy
 ```
 
-**Suggested prompt:**
+**Using the MCP Prompt (recommended):**
+```
+Use the pre-deploy-check prompt for https://staging.my-app.com
+```
+
+This will provide a clear GO/NO-GO decision with blocking issues highlighted.
+
+**Alternative - direct prompt:**
 ```
 Analyze staging.my-app.com and tell me if there are any critical issues 
 that justify delaying the deploy
@@ -391,7 +574,24 @@ that justify delaying the deploy
 
 ---
 
-### Workflow 2: Periodic Audit
+### Workflow 2: Quick Wins Sprint Planning
+
+```
+1. Identify high-impact, low-effort accessibility fixes
+2. Create sprint tasks with time estimates
+3. Track improvements over time
+```
+
+**Using the MCP Prompt (recommended):**
+```
+Use the quick-wins-report prompt for https://my-site.com
+```
+
+This will provide a priority-ordered list with time estimates and a copyable checklist.
+
+---
+
+### Workflow 3: Periodic Audit
 
 ```
 1. Each sprint, analyze the production website
@@ -400,7 +600,14 @@ that justify delaying the deploy
 4. Prioritize fixes for next sprint
 ```
 
-**Suggested prompt:**
+**Using the MCP Prompt:**
+```
+Use the full-accessibility-audit prompt with:
+- url: https://production.com
+- wcagLevel: AA
+```
+
+**Alternative prompt for comparison:**
 ```
 Analyze https://production.com and compare with last 
 month's analysis. Have we introduced new problems?
@@ -408,7 +615,7 @@ month's analysis. Have we introduced new problems?
 
 ---
 
-### Workflow 3: Team Training
+### Workflow 4: Team Training
 
 ```
 1. Analyze a page with varied issues
@@ -417,7 +624,14 @@ month's analysis. Have we introduced new problems?
 4. Apply suggested solutions (suggestedActions)
 ```
 
-**Suggested prompt:**
+**Using the MCP Prompt (recommended):**
+```
+Use the explain-wcag-criterion prompt with criterion: 1.1.1
+```
+
+This provides an in-depth educational explanation with code examples.
+
+**Alternative - analysis with explanation:**
 ```
 Analyze https://demo.com and explain in detail 
 the WCAG 1.1.1 issue (Non-text content):
@@ -425,6 +639,27 @@ the WCAG 1.1.1 issue (Non-text content):
 - Real example of how it impacts them
 - How to fix it step by step
 ```
+
+---
+
+### Workflow 5: Focused Contrast Review
+
+```
+1. Analyze color contrast for specific sections
+2. Get suggested color fixes
+3. Apply changes and re-verify
+```
+
+**Using the MCP Prompt:**
+```
+Use the contrast-check prompt with:
+- url: https://my-site.com
+- selector: .hero-section
+- algorithm: WCAG21
+- wcagLevel: AAA
+```
+
+This provides detailed contrast analysis with CSS fix suggestions.
 
 ---
 

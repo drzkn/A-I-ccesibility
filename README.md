@@ -10,6 +10,13 @@ MCP Server for orchestrating web accessibility tools (axe-core, Pa11y).
   - [analyze-with-pa11y](#analyze-with-pa11y)
   - [analyze-contrast](#analyze-contrast)
   - [analyze-mixed ⭐](#analyze-mixed-)
+- [Available Prompts](#available-prompts)
+  - [full-accessibility-audit](#full-accessibility-audit)
+  - [quick-accessibility-check](#quick-accessibility-check)
+  - [contrast-check](#contrast-check)
+  - [pre-deploy-check](#pre-deploy-check)
+  - [quick-wins-report](#quick-wins-report)
+  - [explain-wcag-criterion](#explain-wcag-criterion)
 - [Enriched Human Context ✨](#enriched-human-context-)
 - [Project Structure](#project-structure)
 - [Scripts](#scripts)
@@ -253,6 +260,125 @@ Analyzes a web page or HTML content to detect color contrast issues according to
 - `individualResults`: Complete results from each tool
 - `deduplicatedCount`: Number of duplicates removed
 
+## Available Prompts
+
+MCP Prompts are user-controlled templates that generate structured messages for accessibility workflows. Unlike tools (which the LLM executes), prompts are invoked directly by users from clients like Claude Desktop or Cursor.
+
+### `full-accessibility-audit`
+
+Comprehensive accessibility audit using axe-core and Pa11y with detailed remediation guidance.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | URL of the page to analyze |
+| `wcagLevel` | "A" \| "AA" \| "AAA" | No | WCAG conformance level (default: AA) |
+
+**What it provides:**
+- Executive summary with issue breakdown by severity
+- Issues grouped by WCAG principle (Perceivable, Operable, Understandable, Robust)
+- Critical issues with real-world impact analysis
+- Prioritized remediation plan with code examples
+
+---
+
+### `quick-accessibility-check`
+
+Fast accessibility check using axe-core with summary of critical issues.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | URL of the page to analyze |
+
+**What it provides:**
+- Quick summary of total issues by severity
+- Critical and serious issues with quick fix suggestions
+- Recommendations for next steps
+
+---
+
+### `contrast-check`
+
+Analyze color contrast accessibility issues using WCAG 2.1 or APCA algorithms with fix suggestions.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | URL of the page to analyze |
+| `selector` | string | No | CSS selector to scope the analysis |
+| `algorithm` | "WCAG21" \| "APCA" | No | Contrast algorithm (default: WCAG21) |
+| `wcagLevel` | "AA" \| "AAA" | No | WCAG level for contrast requirements (default: AA) |
+| `language` | string | No | Language for the output report |
+
+**What it provides:**
+- Contrast analysis summary with pass/fail statistics
+- Detailed failing elements with current vs required ratios
+- Suggested color fixes with CSS code snippets
+- Implementation guide with best practices
+
+---
+
+### `pre-deploy-check`
+
+Verify accessibility compliance before deploying to production.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | URL of the page to verify |
+
+**What it provides:**
+- Clear GO/NO-GO deployment decision
+- Blocking issues that must be fixed before deployment
+- Non-blocking issues for post-deployment
+- WCAG 2.1 Level AA compliance summary
+- Risk assessment and recommended actions
+
+---
+
+### `quick-wins-report`
+
+Identify high-impact accessibility issues that require minimal effort to fix.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | URL of the page to analyze |
+
+**What it provides:**
+- Priority-ordered list of quick wins
+- Impact and effort estimates for each issue
+- Before/after code examples
+- Copyable implementation checklist
+- Estimated accessibility improvement after fixes
+
+---
+
+### `explain-wcag-criterion`
+
+Get detailed explanation of a WCAG criterion with examples and remediation guidance.
+
+**Arguments:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `criterion` | string | Yes | WCAG criterion ID (e.g., 1.1.1, 2.4.4, 1.4.3) |
+
+**What it provides:**
+- Deep dive into the criterion meaning and importance
+- Code examples (before/after)
+- Testing strategies (manual and automated)
+- Common mistakes and how to avoid them
+- Links to official WCAG documentation
+
+---
+
 ## Enriched Human Context ✨
 
 All issues automatically include:
@@ -284,6 +410,19 @@ WCAG data is maintained in `src/shared/data/wcag-criteria.json` and is easily up
 ```
 src/
 ├── server.ts              # MCP entry point
+├── prompts/               # MCP Prompts (user-controlled templates)
+│   ├── index.ts           # Re-exports of all prompts
+│   ├── types/             # PromptDefinition, PromptResult
+│   ├── audit/             # Audit prompts
+│   │   ├── full-accessibility-audit.ts
+│   │   └── quick-accessibility-check.ts
+│   ├── contrast/          # Contrast prompts
+│   │   └── contrast-check.ts
+│   ├── workflows/         # Workflow prompts
+│   │   ├── pre-deploy-check.ts
+│   │   └── quick-wins-report.ts
+│   └── educational/       # Educational prompts
+│       └── explain-wcag-criterion.ts
 ├── shared/                # Shared resources between tools
 │   ├── adapters/          # Base adapter class
 │   ├── data/              # WCAG knowledge base
