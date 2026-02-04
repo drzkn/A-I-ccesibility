@@ -19,6 +19,7 @@ import {
   quickWinsReportPrompt,
   explainWcagCriterionPrompt
 } from "@/prompts/index.js";
+import { registerWcagResources } from "@/resources/index.js";
 
 const server = new McpServer({
   name: 'AccesibilityHub',
@@ -55,6 +56,11 @@ function registerPrompts(): void {
   }
 }
 
+function registerResources(): void {
+  registerWcagResources(server);
+  logger.info('Registered WCAG resources');
+}
+
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
     version: APP_VERSION,
@@ -66,11 +72,18 @@ async function main(): Promise<void> {
       'pre-deploy-check',
       'quick-wins-report',
       'explain-wcag-criterion'
+    ],
+    resources: [
+      'wcag://criteria',
+      'wcag://criteria/{id}',
+      'wcag://criteria/level/{level}',
+      'wcag://criteria/principle/{principle}'
     ]
   });
 
   registerTools();
   registerPrompts();
+  registerResources();
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
