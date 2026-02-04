@@ -17,6 +17,9 @@ MCP Server for orchestrating web accessibility tools (axe-core, Pa11y).
   - [pre-deploy-check](#pre-deploy-check)
   - [quick-wins-report](#quick-wins-report)
   - [explain-wcag-criterion](#explain-wcag-criterion)
+- [Available Resources](#available-resources)
+  - [WCAG Resources](#wcag-resources)
+  - [Contrast Resources](#contrast-resources)
 - [Enriched Human Context ✨](#enriched-human-context-)
 - [Project Structure](#project-structure)
 - [Scripts](#scripts)
@@ -379,6 +382,77 @@ Get detailed explanation of a WCAG criterion with examples and remediation guida
 
 ---
 
+## Available Resources
+
+MCP Resources provide read-only data that clients can query directly. These are ideal for static reference information like WCAG criteria and contrast thresholds.
+
+### WCAG Resources
+
+| URI | Type | Description |
+|-----|------|-------------|
+| `wcag://criteria` | Static | List of all available WCAG 2.1 criteria |
+| `wcag://criteria/{id}` | Template | Specific criterion by ID (e.g., `1.4.3`) |
+| `wcag://criteria/level/{level}` | Template | Criteria by conformance level (A, AA, AAA) |
+| `wcag://criteria/principle/{principle}` | Template | Criteria by POUR principle (perceivable, operable, understandable, robust) |
+
+**Example response from `wcag://criteria/1.4.3`:**
+
+```json
+{
+  "id": "1.4.3",
+  "title": "Contrast (Minimum)",
+  "level": "AA",
+  "principle": "perceivable",
+  "guideline": "1.4",
+  "description": "The visual presentation of text and images of text has a contrast ratio of at least 4.5:1",
+  "affectedUsers": ["low-vision", "color-blind"],
+  "suggestedActions": ["Ensure text has sufficient contrast against background"]
+}
+```
+
+### Contrast Resources
+
+| URI | Type | Description |
+|-----|------|-------------|
+| `contrast://thresholds/wcag21` | Static | WCAG 2.1 contrast ratio thresholds |
+| `contrast://thresholds/apca` | Static | APCA contrast thresholds (WCAG 3.0 draft) |
+| `contrast://algorithms` | Static | Supported contrast algorithms with descriptions |
+
+**Example response from `contrast://thresholds/wcag21`:**
+
+```json
+{
+  "AA_NORMAL": { "ratio": 4.5, "description": "Normal text (< 18pt or < 14pt bold)" },
+  "AA_LARGE": { "ratio": 3.0, "description": "Large text (>= 18pt or >= 14pt bold)" },
+  "AAA_NORMAL": { "ratio": 7.0, "description": "Enhanced contrast for normal text" },
+  "AAA_LARGE": { "ratio": 4.5, "description": "Enhanced contrast for large text" },
+  "NON_TEXT": { "ratio": 3.0, "description": "UI components and graphical objects" }
+}
+```
+
+**Example response from `contrast://algorithms`:**
+
+```json
+[
+  {
+    "id": "WCAG21",
+    "name": "WCAG 2.1 Contrast Ratio",
+    "description": "Standard contrast ratio algorithm defined in WCAG 2.1",
+    "standard": "WCAG 2.1 Success Criterion 1.4.3 / 1.4.6",
+    "thresholdUri": "contrast://thresholds/wcag21"
+  },
+  {
+    "id": "APCA",
+    "name": "Advanced Perceptual Contrast Algorithm",
+    "description": "Advanced algorithm considering human visual perception more accurately",
+    "standard": "WCAG 3.0 (Draft)",
+    "thresholdUri": "contrast://thresholds/apca"
+  }
+]
+```
+
+---
+
 ## Enriched Human Context ✨
 
 All issues automatically include:
@@ -423,6 +497,15 @@ src/
 │   │   └── quick-wins-report.ts
 │   └── educational/       # Educational prompts
 │       └── explain-wcag-criterion.ts
+├── resources/             # MCP Resources (read-only data)
+│   ├── index.ts           # Re-exports of all resources
+│   ├── types/             # ResourceDefinition types
+│   ├── wcag/              # WCAG criteria resources
+│   │   ├── wcag.resources.ts    # Resource registration
+│   │   └── wcag.data.ts         # Data access functions
+│   └── contrast/          # Contrast threshold resources
+│       ├── contrast.resources.ts
+│       └── contrast.data.ts
 ├── shared/                # Shared resources between tools
 │   ├── adapters/          # Base adapter class
 │   ├── data/              # WCAG knowledge base
@@ -460,6 +543,11 @@ tests/
 ├── fixtures/              # HTML with known accessibility issues
 ├── helpers/               # Test utilities (mock server, etc.)
 ├── setup.ts               # Global test configuration
+├── resources/             # Resource tests
+│   ├── wcag/
+│   │   └── wcag.resources.test.ts
+│   └── contrast/
+│       └── contrast.resources.test.ts
 └── tools/                 # Tests organized by tool
     ├── Axe/
     │   ├── adapters.test.ts

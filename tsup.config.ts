@@ -31,6 +31,7 @@ export default defineConfig({
       '@/data': './src/data',
       '@/prompts': './src/prompts',
       '@/shared': './src/shared',
+      '@/resources': './src/resources',
     };
   },
 });

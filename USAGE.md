@@ -8,6 +8,10 @@ This guide provides practical examples of how to use the accessibility tools fro
 - [MCP Prompts](#mcp-prompts)
   - [Using Prompts](#using-prompts)
   - [Available Prompts](#available-prompts-1)
+- [MCP Resources](#mcp-resources)
+  - [WCAG Resources](#wcag-resources)
+  - [Contrast Resources](#contrast-resources)
+  - [Accessing Resources](#accessing-resources)
 - [Examples by Tool](#examples-by-tool)
 - [Effective Prompts](#effective-prompts)
 - [Interpreting Results](#interpreting-results)
@@ -291,6 +295,125 @@ Use the explain-wcag-criterion prompt with criterion: 1.4.3
 | Custom analysis with specific options | | ✅ Use tools directly |
 | Automated scripts or CI/CD | | ✅ Use tools directly |
 | Comparing tool outputs | | ✅ `analyze-mixed` |
+
+---
+
+## MCP Resources
+
+MCP Resources provide **read-only data** that clients can query directly. Unlike tools (which perform actions) and prompts (which generate structured messages), resources expose static reference data that can be used for lookup, validation, or educational purposes.
+
+### WCAG Resources
+
+Reference data for WCAG 2.1 criteria:
+
+| URI | Description |
+|-----|-------------|
+| `wcag://criteria` | Complete list of all WCAG 2.1 criteria |
+| `wcag://criteria/{id}` | Specific criterion (e.g., `wcag://criteria/1.4.3`) |
+| `wcag://criteria/level/{level}` | Filter by level: `A`, `AA`, or `AAA` |
+| `wcag://criteria/principle/{principle}` | Filter by POUR principle: `perceivable`, `operable`, `understandable`, `robust` |
+
+**Example: Get all Level AA criteria**
+```
+Resource: wcag://criteria/level/AA
+```
+
+**Example: Get criterion 1.4.3 (Contrast Minimum)**
+```
+Resource: wcag://criteria/1.4.3
+```
+
+Returns:
+```json
+{
+  "id": "1.4.3",
+  "title": "Contrast (Minimum)",
+  "level": "AA",
+  "principle": "perceivable",
+  "guideline": "1.4",
+  "description": "The visual presentation of text has a contrast ratio of at least 4.5:1",
+  "affectedUsers": ["low-vision", "color-blind"],
+  "suggestedActions": ["Ensure text has sufficient contrast against background"]
+}
+```
+
+### Contrast Resources
+
+Reference data for contrast requirements and algorithms:
+
+| URI | Description |
+|-----|-------------|
+| `contrast://thresholds/wcag21` | WCAG 2.1 contrast ratio requirements |
+| `contrast://thresholds/apca` | APCA (WCAG 3.0 draft) lightness thresholds |
+| `contrast://algorithms` | List of supported algorithms with descriptions |
+
+**Example: WCAG 2.1 thresholds**
+```
+Resource: contrast://thresholds/wcag21
+```
+
+Returns:
+```json
+{
+  "AA_NORMAL": { "ratio": 4.5, "description": "Normal text (< 18pt or < 14pt bold)" },
+  "AA_LARGE": { "ratio": 3.0, "description": "Large text (>= 18pt or >= 14pt bold)" },
+  "AAA_NORMAL": { "ratio": 7.0, "description": "Enhanced contrast for normal text" },
+  "AAA_LARGE": { "ratio": 4.5, "description": "Enhanced contrast for large text" },
+  "NON_TEXT": { "ratio": 3.0, "description": "UI components and graphical objects" }
+}
+```
+
+**Example: APCA thresholds**
+```
+Resource: contrast://thresholds/apca
+```
+
+Returns:
+```json
+{
+  "BODY_TEXT": { "ratio": 75, "description": "Body text (fluent reading)" },
+  "LARGE_TEXT": { "ratio": 60, "description": "Large text (headings, titles)" },
+  "NON_TEXT": { "ratio": 45, "description": "Non-text elements (icons, borders)" }
+}
+```
+
+### Accessing Resources
+
+#### In Claude Desktop
+
+1. Resources are automatically available to the LLM for context
+2. You can ask Claude to "look up WCAG criterion 1.4.3" and it will access the resource
+3. Resources provide authoritative data the LLM can reference
+
+#### In Cursor
+
+1. Access resources via the MCP resources panel
+2. Or ask the assistant to query specific resource URIs
+3. Resources can be used to validate analysis results
+
+#### Programmatic Access
+
+MCP clients can fetch resources directly:
+
+```typescript
+// List available resources
+const resources = await client.listResources();
+
+// Fetch specific resource
+const wcagCriteria = await client.readResource({ 
+  uri: 'wcag://criteria/1.4.3' 
+});
+```
+
+### Use Cases for Resources
+
+| Use Case | Resource |
+|----------|----------|
+| Learn about a specific WCAG criterion | `wcag://criteria/{id}` |
+| Find all perceivable requirements | `wcag://criteria/principle/perceivable` |
+| Check what contrast ratio is needed for AA | `contrast://thresholds/wcag21` |
+| Understand APCA vs WCAG21 differences | `contrast://algorithms` |
+| Get all AAA-level criteria | `wcag://criteria/level/AAA` |
 
 ---
 
@@ -780,6 +903,15 @@ For projects wanting to prepare for WCAG 3.0:
 Currently no. The tools analyze the public page. For authenticated analysis, consider:
 - Configuring a shared browser with cookies
 - Using HTML captured post-login
+
+### What are MCP Resources used for?
+
+Resources provide **reference data** that complements the analysis tools:
+- **WCAG criteria lookup**: Get detailed info about any WCAG criterion
+- **Contrast thresholds**: Quick reference for required contrast ratios
+- **Algorithm comparison**: Understand WCAG21 vs APCA differences
+
+Resources are read-only and don't require any input—they just expose accessibility knowledge that can be queried directly.
 
 ---
 

@@ -31,7 +31,8 @@
     "paths": {
       "@/shared/*": ["shared/*"],
       "@/tools/*": ["tools/*"],
-      "@/prompts/*": ["prompts/*"]
+      "@/prompts/*": ["prompts/*"],
+      "@/resources/*": ["resources/*"]
     }
   },
   "include": ["src/**/*.ts"],
