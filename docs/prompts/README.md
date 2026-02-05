@@ -1,48 +1,61 @@
-# Prompts
+# MCP Prompts
 
-MCP Prompts are pre-built templates that help you perform common accessibility tasks efficiently.
+MCP Prompts are **user-controlled templates** that generate structured messages for accessibility workflows. Unlike tools (which the LLM executes automatically), prompts are invoked directly by users and provide guided analysis with detailed output formats.
 
 ## Available Prompts
 
-| Prompt | Description | Arguments |
-|--------|-------------|-----------|
-| [full-accessibility-audit](./full-accessibility-audit.md) | Complete accessibility audit | `url` |
-| [quick-accessibility-check](./quick-accessibility-check.md) | Fast accessibility overview | `url` |
-| [contrast-check](./contrast-check.md) | Color contrast validation | `foreground`, `background`, `text_size` |
-| [pre-deploy-check](./pre-deploy-check.md) | Pre-deployment accessibility checklist | `url` |
-| [quick-wins-report](./quick-wins-report.md) | Easy-to-fix issues report | `url` |
-| [explain-wcag-criterion](./explain-wcag-criterion.md) | WCAG criterion explanation | `criterion_id` |
+| Prompt | Description | Best For |
+|--------|-------------|----------|
+| [full-accessibility-audit](./full-accessibility-audit.md) | Comprehensive audit with remediation guidance | Major releases, compliance reviews |
+| [quick-accessibility-check](./quick-accessibility-check.md) | Fast check with critical issues summary | Development, CI/CD pipelines |
+| [contrast-check](./contrast-check.md) | Color contrast analysis with fix suggestions | Design reviews, APCA evaluation |
+| [pre-deploy-check](./pre-deploy-check.md) | Verify compliance before deployment | Deployment gates, release checklists |
+| [quick-wins-report](./quick-wins-report.md) | High-impact, low-effort fixes | Sprint planning, quick improvements |
+| [explain-wcag-criterion](./explain-wcag-criterion.md) | Deep dive into any WCAG criterion | Learning, team training |
 
 ## How to Use Prompts
 
 ### In Claude Desktop
 
-1. Click the prompt icon (📝) in the chat interface
+1. Click the **prompts icon** (📝) in the input area
 2. Select the desired prompt from the list
-3. Fill in the required arguments
+3. Fill in the required arguments (URL, etc.)
 4. Submit to start the analysis
 
 ### In Cursor
 
-Use the prompt by name in your conversation:
+1. Use the **slash command** format: `/full-accessibility-audit`
+2. Or access via the MCP prompts panel
+3. Provide the required arguments when prompted
+
+### Example Usage
 
 ```
-Use the full-accessibility-audit prompt for https://example.com
+Use the full-accessibility-audit prompt with:
+- url: https://my-site.com
+- wcagLevel: AA
 ```
 
 ## Prompts vs Tools: When to Use Each
 
-| Scenario | Use Prompt | Use Tool |
-|----------|------------|----------|
-| Quick accessibility check | ✅ `quick-accessibility-check` | |
-| Full site audit | ✅ `full-accessibility-audit` | |
-| Specific color pair check | ✅ `contrast-check` | |
-| Custom analysis parameters | | ✅ `analyze-with-axe` |
-| Programmatic integration | | ✅ Any tool |
-| WCAG level specific testing | | ✅ `analyze-with-pa11y` |
-| Learning about WCAG | ✅ `explain-wcag-criterion` | |
+| Scenario | Use Prompt | Use Tool Directly |
+|----------|------------|-------------------|
+| Comprehensive audit with structured report | ✅ `full-accessibility-audit` | |
+| Deployment gate with GO/NO-GO decision | ✅ `pre-deploy-check` | |
+| Quick check during development | ✅ `quick-accessibility-check` | |
+| Focused contrast analysis with fixes | ✅ `contrast-check` | |
+| Learning about WCAG criteria | ✅ `explain-wcag-criterion` | |
+| Custom analysis with specific options | | ✅ Use tools directly |
+| Automated scripts or CI/CD | | ✅ Use tools directly |
+| Comparing tool outputs | | ✅ `analyze-mixed` |
 
 ### Key Differences
 
-- **Prompts**: Pre-configured workflows with guided output, ideal for common tasks
-- **Tools**: Direct access to analysis engines with full parameter control
+- **Prompts**: Pre-configured workflows with guided output, ideal for common tasks. User-controlled templates that provide structured reports.
+- **Tools**: Direct access to analysis engines with full parameter control. Best for automation and custom workflows.
+
+## Related Documentation
+
+- [Tools Reference](../tools/README.md) - Direct tool access with full parameters
+- [Workflows Guide](../guides/workflows.md) - Recommended workflows combining prompts and tools
+- [Effective Prompts](../guides/effective-prompts.md) - Tips for writing better accessibility prompts
