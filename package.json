@@ -1,6 +1,6 @@
 {
   "name": "accessibility-hub",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "MCP Server for web accessibility tools orchestration",
   "main": "dist/server.js",
   "types": "dist/server.d.ts",
