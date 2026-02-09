@@ -2,7 +2,7 @@
 
 MCP Server for orchestrating web accessibility tools (axe-core, Pa11y). Analyze web pages, check color contrast, and get detailed WCAG compliance reports with enriched human context.
 
-[![npm version](https://img.shields.io/npm/v/accessibilityhub)](https://www.npmjs.com/package/accessibilityhub)
+[![npm version](https://img.shields.io/npm/v/accessibilityhub)](https://www.npmjs.com/package/accessibility-hub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Quick Start

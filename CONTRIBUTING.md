@@ -13,8 +13,8 @@ Thank you for your interest in contributing to AccesibilityHub! This guide will 
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/drzkn/A-I-ccesibility.git
-cd A-I-ccesibility
+git clone https://github.com/drzkn/AccesibilityHub.git
+cd AccesibilityHub
 pnpm install
 ```
 
@@ -52,7 +52,7 @@ pnpm dev      # Watch mode - rebuilds on changes
 ```
 AccesibilityHub/
 ├── src/
-│   ├── server.ts              # MCP server entry point
+│   ├── server.ts               # MCP server entry point
 │   ├── tools/                  # Accessibility analysis tools
 │   │   ├── Axe/                # axe-core integration
 │   │   ├── Pa11y/              # Pa11y integration
@@ -178,7 +178,7 @@ pnpm test:coverage     # With coverage report
 
 ## Pull Request Guidelines
 
-1. **Create a feature branch** from `main`
+1. **Create a feature branch** from `master`
 2. **Follow the conventions** described in this guide
 3. **Add tests** for new functionality
 4. **Run the full test suite** before submitting
