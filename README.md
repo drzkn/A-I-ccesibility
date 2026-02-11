@@ -1,8 +1,8 @@
 # AccesibilityHub
 
-MCP Server for orchestrating web accessibility tools (axe-core, Pa11y). Analyze web pages, check color contrast, and get detailed WCAG compliance reports with enriched human context.
+MCP Server for orchestrating web accessibility tools (axe-core, Pa11y, Lighthouse). Analyze web pages, check color contrast, get Lighthouse accessibility scores, and get detailed WCAG compliance reports with enriched human context.
 
-[![npm version](https://img.shields.io/npm/v/accessibilityhub)](https://www.npmjs.com/package/accessibility-hub)
+[![npm version](https://img.shields.io/npm/v/accessibility-hub)](https://www.npmjs.com/package/accessibility-hub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Quick Start
@@ -34,6 +34,7 @@ Then ask your AI assistant:
 |------|-------------|------|
 | `analyze-with-axe` | Analyze accessibility using axe-core | [docs/tools/analyze-with-axe.md](docs/tools/analyze-with-axe.md) |
 | `analyze-with-pa11y` | Analyze accessibility using Pa11y | [docs/tools/analyze-with-pa11y.md](docs/tools/analyze-with-pa11y.md) |
+| `analyze-with-lighthouse` | Analyze accessibility using Lighthouse (score 0-100) | [docs/tools/analyze-with-lighthouse.md](docs/tools/analyze-with-lighthouse.md) |
 | `analyze-contrast` | Check color contrast (WCAG 2.1 / APCA) | [docs/tools/analyze-contrast.md](docs/tools/analyze-contrast.md) |
 | `analyze-mixed` ⭐ | Run multiple tools in parallel and combine results | [docs/tools/analyze-mixed.md](docs/tools/analyze-mixed.md) |
 
@@ -41,12 +42,14 @@ Then ask your AI assistant:
 
 | Prompt | Description | Docs |
 |--------|-------------|------|
-| `full-accessibility-audit` | Comprehensive audit with remediation guidance | [docs/prompts/full-accessibility-audit.md](docs/prompts/full-accessibility-audit.md) |
+| `full-accessibility-audit` | Comprehensive audit using axe-core, Pa11y, and Lighthouse | [docs/prompts/full-accessibility-audit.md](docs/prompts/full-accessibility-audit.md) |
 | `quick-accessibility-check` | Fast check with critical issues summary | [docs/prompts/quick-accessibility-check.md](docs/prompts/quick-accessibility-check.md) |
 | `contrast-check` | Color contrast analysis with fix suggestions | [docs/prompts/contrast-check.md](docs/prompts/contrast-check.md) |
-| `pre-deploy-check` | Verify compliance before deployment | [docs/prompts/pre-deploy-check.md](docs/prompts/pre-deploy-check.md) |
-| `quick-wins-report` | High-impact, low-effort fixes | [docs/prompts/quick-wins-report.md](docs/prompts/quick-wins-report.md) |
+| `pre-deploy-check` | Verify compliance with score threshold before deployment | [docs/prompts/pre-deploy-check.md](docs/prompts/pre-deploy-check.md) |
+| `quick-wins-report` | High-impact, low-effort fixes from all three tools | [docs/prompts/quick-wins-report.md](docs/prompts/quick-wins-report.md) |
 | `explain-wcag-criterion` | Deep dive into any WCAG criterion | [docs/prompts/explain-wcag-criterion.md](docs/prompts/explain-wcag-criterion.md) |
+| `lighthouse-audit` | Lighthouse score-focused accessibility audit | [docs/prompts/lighthouse-audit.md](docs/prompts/lighthouse-audit.md) |
+| `lighthouse-score-improvement` | Phased plan to reach a target accessibility score | [docs/prompts/lighthouse-score-improvement.md](docs/prompts/lighthouse-score-improvement.md) |
 
 ## Available Resources
 
@@ -54,6 +57,7 @@ Then ask your AI assistant:
 |----------|-------------|------|
 | `wcag://criteria` | WCAG 2.1 criteria reference data | [docs/resources/wcag-criteria.md](docs/resources/wcag-criteria.md) |
 | `contrast://thresholds/*` | Contrast thresholds (WCAG 2.1 / APCA) | [docs/resources/contrast-thresholds.md](docs/resources/contrast-thresholds.md) |
+| `lighthouse://audits` | Lighthouse accessibility audit catalog with WCAG mappings | [docs/resources/lighthouse-audits.md](docs/resources/lighthouse-audits.md) |
 
 ## Enriched Human Context ✨
 

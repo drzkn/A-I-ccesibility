@@ -6,20 +6,24 @@ import {
   analyzeWithPa11yTool,
   analyzeMixedTool,
   analyzeContrastTool,
+  analyzeWithLighthouseTool,
   disposeAxeAdapter,
   disposePa11yAdapter,
   disposeAnalyzeMixedAdapters,
-  disposeContrastAdapter
+  disposeContrastAdapter,
+  disposeLighthouseAdapter
 } from "@/tools/index.js";
 import {
   fullAccessibilityAuditPrompt,
+  lighthouseAuditPrompt,
   quickAccessibilityCheckPrompt,
   contrastCheckPrompt,
   preDeployCheckPrompt,
   quickWinsReportPrompt,
+  lighthouseScoreImprovementPrompt,
   explainWcagCriterionPrompt
 } from "@/prompts/index.js";
-import { registerWcagResources, registerContrastResources } from "@/resources/index.js";
+import { registerWcagResources, registerContrastResources, registerLighthouseResources } from "@/resources/index.js";
 
 const server = new McpServer({
   name: 'AccesibilityHub',
@@ -38,15 +42,20 @@ function registerTools(): void {
 
   analyzeContrastTool.register(server);
   logger.info('Registered tool: analyze-contrast');
+
+  analyzeWithLighthouseTool.register(server);
+  logger.info('Registered tool: analyze-with-lighthouse');
 }
 
 function registerPrompts(): void {
   const prompts = [
     fullAccessibilityAuditPrompt,
+    lighthouseAuditPrompt,
     quickAccessibilityCheckPrompt,
     contrastCheckPrompt,
     preDeployCheckPrompt,
     quickWinsReportPrompt,
+    lighthouseScoreImprovementPrompt,
     explainWcagCriterionPrompt
   ];
 
@@ -62,18 +71,22 @@ function registerResources(): void {
 
   registerContrastResources(server);
   logger.info('Registered contrast resources');
+
+  registerLighthouseResources(server);
+  logger.info('Registered Lighthouse resources');
 }
 
 async function main(): Promise<void> {
   logger.info('Starting AccesibilityHub Server', {
     version: APP_VERSION,
-    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-mixed', 'analyze-contrast'],
+    tools: ['analyze-with-axe', 'analyze-with-pa11y', 'analyze-mixed', 'analyze-contrast', 'analyze-with-lighthouse'],
     prompts: [
       'full-accessibility-audit',
       'quick-accessibility-check',
       'contrast-check',
       'pre-deploy-check',
       'quick-wins-report',
+      'lighthouse-score-improvement',
       'explain-wcag-criterion'
     ],
     resources: [
@@ -83,7 +96,11 @@ async function main(): Promise<void> {
       'wcag://criteria/principle/{principle}',
       'contrast://thresholds/wcag21',
       'contrast://thresholds/apca',
-      'contrast://algorithms'
+      'contrast://algorithms',
+      'lighthouse://audits',
+      'lighthouse://audits/{auditId}',
+      'lighthouse://audits/level/{level}',
+      'lighthouse://audits/principle/{principle}'
     ]
   });
 
@@ -104,7 +121,8 @@ async function shutdown(): Promise<void> {
     disposeAxeAdapter(),
     disposePa11yAdapter(),
     disposeAnalyzeMixedAdapters(),
-    disposeContrastAdapter()
+    disposeContrastAdapter(),
+    disposeLighthouseAdapter()
   ]);
 
   logger.info('All adapters disposed');

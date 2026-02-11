@@ -1,10 +1,10 @@
 # pre-deploy-check
 
-Verify accessibility compliance before deployment.
+Verify accessibility compliance before deployment using axe-core, Pa11y, and Lighthouse.
 
 ## Description
 
-This prompt performs a deployment-focused accessibility check, providing a clear GO/NO-GO decision based on critical issues. It identifies blocking vs non-blocking issues and provides a risk assessment for deployment.
+This prompt performs a deployment-focused accessibility check using all three analysis tools (axe-core, Pa11y, and Lighthouse), providing a clear GO/NO-GO decision based on both critical issues and the Lighthouse accessibility score. It includes a minimum score threshold gate, identifies blocking vs non-blocking issues, and provides a risk assessment for deployment.
 
 **Best for:** Deployment gates, release checklists, and compliance verification.
 
@@ -13,6 +13,7 @@ This prompt performs a deployment-focused accessibility check, providing a clear
 | Argument | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
 | `url` | string | ✅ | - | URL of the staging/pre-production page |
+| `minScore` | number | | `90` | Minimum Lighthouse accessibility score to pass (0-100) |
 
 ## Example Usage
 
@@ -20,6 +21,14 @@ This prompt performs a deployment-focused accessibility check, providing a clear
 
 ```
 Use the pre-deploy-check prompt for https://staging.my-app.com
+```
+
+### With Custom Score Threshold
+
+```
+Use the pre-deploy-check prompt with:
+- url: https://staging.my-app.com
+- minScore: 95
 ```
 
 ### Natural Language
@@ -32,20 +41,20 @@ Check if https://staging.my-site.com is ready to deploy from an accessibility st
 
 The prompt generates a deployment-focused report with:
 
-- **GO/NO-GO Decision**: Clear deployment recommendation
-- **Blocking Issues**: Critical problems that must be fixed before deployment
+- **GO/NO-GO Decision**: Clear deployment recommendation based on BOTH Lighthouse score and issues
+- **Lighthouse Score Gate**: Score vs threshold with PASS/FAIL result and key failing audits
+- **Blocking Issues**: Critical problems from axe-core, Pa11y, and Lighthouse that must be fixed before deployment
 - **Non-Blocking Issues**: Issues to track but don't block deployment
-- **WCAG Compliance Status**: Level AA conformance assessment
-- **Risk Assessment**: Potential impact of deploying with current issues
-- **Action Items**: Specific steps before deployment
+- **Compliance Summary**: Lighthouse score, WCAG 2.1 Level AA conformance, and risk assessment
+- **Recommended Actions**: Score-improvement suggestions for NO-GO, post-deployment fixes for GO
 
 ### Decision Categories
 
 | Decision | Meaning |
 |----------|---------|
-| ✅ **GO** | No critical issues, safe to deploy |
-| ⚠️ **GO WITH CAUTION** | Minor issues exist, document and track them |
-| ❌ **NO-GO** | Critical issues must be fixed before deployment |
+| ✅ **GO** | Lighthouse score >= threshold AND no critical/serious issues |
+| ⚠️ **GO WITH CAUTION** | Score >= threshold with minor issues, OR score slightly below threshold with no critical issues |
+| ❌ **NO-GO** | Score well below threshold OR critical/serious issues found |
 
 ### Example Output Structure
 
@@ -56,13 +65,18 @@ The prompt generates a deployment-focused report with:
 
 ---
 
+### Lighthouse Score Gate
+- **Score**: 91/100 — Good
+- **Threshold**: 90
+- **Result**: ✅ PASS
+
 ### Summary
 - **Critical Issues**: 0
 - **Serious Issues**: 2
 - **Moderate Issues**: 4
 
 ### Blocking Issues
-None - no critical accessibility violations detected.
+None - no critical accessibility violations detected and score meets threshold.
 
 ### Non-Blocking Issues (Track in Backlog)
 
@@ -70,27 +84,30 @@ None - no critical accessibility violations detected.
 1. **Insufficient contrast on footer links**
    - Impact: Low-vision users may struggle to read
    - Risk: Low - affects non-critical content
+   - Detected by: axe-core, Lighthouse
    - Track as: JIRA-1234
 
 2. **Missing skip-to-content link**
    - Impact: Keyboard users must tab through navigation
    - Risk: Medium - affects keyboard navigation
+   - Detected by: Pa11y
    - Track as: JIRA-1235
 
-### WCAG 2.1 Level AA Compliance
+### Compliance Summary
+- **Lighthouse Accessibility Score**: 91/100
 - **Perceivable**: ⚠️ 2 issues
 - **Operable**: ✅ Pass
 - **Understandable**: ✅ Pass
 - **Robust**: ✅ Pass
 
 ### Risk Assessment
-**Low Risk** - Issues are non-critical and affect limited user segments.
+**Low Risk** - Score exceeds threshold and issues are non-critical.
 Recommend deploying with issues tracked in backlog for next sprint.
 
-### Action Items Before Deploy
+### Recommended Actions
 1. ✅ Review and accept non-blocking issues
 2. ✅ Create tickets for backlog items
-3. ✅ Document known accessibility limitations
+3. Target score of 95 for next deployment cycle
 ```
 
 ## Workflow Integration
@@ -127,4 +144,6 @@ Recommend deploying with issues tracked in backlog for next sprint.
 
 - [quick-accessibility-check](./quick-accessibility-check.md) - Faster check for development
 - [full-accessibility-audit](./full-accessibility-audit.md) - Comprehensive audit with remediation
+- [lighthouse-score-improvement](./lighthouse-score-improvement.md) - Plan to reach a target score
+- [analyze-with-lighthouse](../tools/analyze-with-lighthouse.md) - Direct Lighthouse tool access
 - [Workflows Guide](../guides/workflows.md) - Pre-deploy workflow details

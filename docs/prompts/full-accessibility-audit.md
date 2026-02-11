@@ -1,10 +1,10 @@
 # full-accessibility-audit
 
-Comprehensive accessibility audit with detailed remediation guidance.
+Comprehensive accessibility audit using axe-core, Pa11y, and Lighthouse with detailed remediation guidance.
 
 ## Description
 
-This prompt performs a thorough accessibility analysis of a web page, providing an executive summary, issues grouped by WCAG principle, and a prioritized remediation plan with code examples.
+This prompt performs a thorough accessibility analysis of a web page using three tools (axe-core, Pa11y, and Lighthouse), providing an executive summary with the Lighthouse accessibility score, issues grouped by WCAG principle, and a prioritized remediation plan with code examples.
 
 **Best for:** Comprehensive audits before major releases or compliance reviews.
 
@@ -42,24 +42,27 @@ Run a full accessibility audit on https://example.com targeting WCAG AA complian
 
 The prompt generates a comprehensive report with:
 
-- **Executive Summary**: Overview with severity breakdown (critical, serious, moderate, minor)
-- **Issues by WCAG Principle**: Problems grouped by Perceivable, Operable, Understandable, Robust
-- **Critical Issues Analysis**: Detailed user impact for each critical issue
-- **Remediation Plan**: Prioritized fixes with before/after code examples
-- **Compliance Status**: Overall WCAG conformance assessment
+- **Executive Summary**: Lighthouse accessibility score (0-100) with qualitative assessment, total issues across all tools, severity breakdown
+- **Issues by WCAG Principle**: Problems from axe-core, Pa11y, and Lighthouse grouped by Perceivable, Operable, Understandable, Robust
+- **Critical Issues Analysis**: Detailed user impact for each critical issue, including which tool(s) detected it
+- **Remediation Plan**: Prioritized fixes ordered by severity, score impact, user impact, and effort — with before/after code examples
+- **Code Examples**: Before/after snippets for top issues
+- **Score Improvement Projection**: Estimated Lighthouse score gain after fixing critical and serious issues
 
 ### Example Output Structure
 
 ```
 ## Executive Summary
-- Total issues: 15
-- Critical: 3 | Serious: 5 | Moderate: 4 | Minor: 3
+- **Lighthouse Accessibility Score**: 72/100 — Needs Improvement
+- Total unique issues: 18 (across axe-core, Pa11y, Lighthouse)
+- Critical: 3 | Serious: 5 | Moderate: 6 | Minor: 4
+- WCAG AA conformance: Partial
 
 ## Issues by WCAG Principle
 
-### Perceivable (7 issues)
-- 1.1.1 Non-text Content: 3 issues
-- 1.4.3 Contrast Minimum: 4 issues
+### Perceivable (9 issues)
+- 1.1.1 Non-text Content: 3 issues (axe-core, Lighthouse)
+- 1.4.3 Contrast Minimum: 6 issues (axe-core, Pa11y, Lighthouse)
 
 ### Operable (5 issues)
 ...
@@ -69,11 +72,12 @@ The prompt generates a comprehensive report with:
 ### Missing alt text on hero image
 - **Impact**: Screen reader users cannot understand the main visual content
 - **Affected Users**: screen-reader, low-vision
+- **Detected by**: axe-core, Lighthouse
 - **Fix**: Add descriptive alt attribute
 
 ## Remediation Plan
 
-### Priority 1: Fix Today (Critical + Low Effort)
+### Priority 1: Fix Today (Critical + High Score Impact)
 1. Add alt text to images (3 instances)
    ```html
    <!-- Before -->
@@ -82,6 +86,10 @@ The prompt generates a comprehensive report with:
    <!-- After -->
    <img src="hero.jpg" alt="Team collaborating in modern office">
    ```
+
+## Score Improvement Projection
+- Fixing critical issues: 72 → ~82/100
+- Fixing critical + serious: 72 → ~91/100
 ```
 
 ## When to Use
@@ -97,5 +105,7 @@ The prompt generates a comprehensive report with:
 ## Related
 
 - [quick-accessibility-check](./quick-accessibility-check.md) - Faster, less detailed alternative
+- [lighthouse-audit](./lighthouse-audit.md) - Score-focused audit using Lighthouse only
 - [pre-deploy-check](./pre-deploy-check.md) - Deployment-focused with GO/NO-GO decision
-- [analyze-mixed](../tools/analyze-mixed.md) - Direct tool for programmatic access
+- [analyze-mixed](../tools/analyze-mixed.md) - Direct tool for programmatic access (axe-core + Pa11y)
+- [analyze-with-lighthouse](../tools/analyze-with-lighthouse.md) - Direct Lighthouse tool access

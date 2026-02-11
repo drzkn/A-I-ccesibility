@@ -108,6 +108,7 @@ export function buildCombinedSummary(
   const byTool: Record<Exclude<ToolSource, 'contrast-analyzer'>, number> = {
     'axe-core': 0,
     'pa11y': 0,
+    'lighthouse': 0,
   };
 
   const byRule: Record<string, number> = {};
@@ -142,7 +143,7 @@ export function formatOutput(
   return {
     success: result.success,
     target: result.target,
-    toolsUsed: result.toolsUsed as Array<'axe-core' | 'pa11y'>,
+    toolsUsed: result.toolsUsed as Array<'axe-core' | 'pa11y' | 'lighthouse'>,
     issueCount: result.issues.length,
     deduplicatedCount,
     issues: result.issues,

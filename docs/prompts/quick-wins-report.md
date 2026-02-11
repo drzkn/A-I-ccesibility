@@ -1,10 +1,10 @@
 # quick-wins-report
 
-High-impact, low-effort accessibility fixes.
+High-impact, low-effort accessibility fixes using axe-core, Pa11y, and Lighthouse.
 
 ## Description
 
-This prompt identifies accessibility issues that provide the best return on investment - high impact fixes that require minimal effort. It provides time estimates, before/after code examples, and a copyable implementation checklist.
+This prompt identifies accessibility issues that provide the best return on investment using all three analysis tools (axe-core, Pa11y, and Lighthouse). It focuses on high impact fixes that require minimal effort, includes the current Lighthouse score with projected improvement, and provides time estimates, before/after code examples, and a copyable implementation checklist.
 
 **Best for:** Sprint planning, identifying low-hanging fruit, quick improvements.
 
@@ -32,11 +32,12 @@ Show me the quick accessibility wins for https://example.com - what can we fix e
 
 The prompt generates a prioritized report with:
 
-- **Priority-Ordered Fixes**: Ranked by impact/effort ratio
+- **Priority-Ordered Fixes**: Ranked by impact/effort ratio across all three tools
 - **Time Estimates**: Approximate time to implement each fix
 - **Before/After Code**: Ready-to-use code examples
 - **Implementation Checklist**: Copyable list for task tracking
-- **Score Improvement**: Estimated accessibility score impact
+- **Current Lighthouse Score**: Score with key failing audits that are also quick wins
+- **Impact Estimation**: Projected Lighthouse score improvement and additional WCAG criteria addressed
 
 ### Example Output Structure
 
@@ -154,5 +155,7 @@ Quick wins are selected based on:
 ## Related
 
 - [full-accessibility-audit](./full-accessibility-audit.md) - Complete audit with all issues
+- [lighthouse-score-improvement](./lighthouse-score-improvement.md) - Phased plan to reach a target score
+- [analyze-with-lighthouse](../tools/analyze-with-lighthouse.md) - Direct Lighthouse tool access
 - [Interpreting Results](../guides/interpreting-results.md) - How to prioritize fixes
 - [Workflows Guide](../guides/workflows.md) - Sprint planning workflow

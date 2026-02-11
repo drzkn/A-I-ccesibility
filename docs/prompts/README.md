@@ -6,12 +6,14 @@ MCP Prompts are **user-controlled templates** that generate structured messages 
 
 | Prompt | Description | Best For |
 |--------|-------------|----------|
-| [full-accessibility-audit](./full-accessibility-audit.md) | Comprehensive audit with remediation guidance | Major releases, compliance reviews |
+| [full-accessibility-audit](./full-accessibility-audit.md) | Comprehensive audit using axe-core, Pa11y, and Lighthouse | Major releases, compliance reviews |
 | [quick-accessibility-check](./quick-accessibility-check.md) | Fast check with critical issues summary | Development, CI/CD pipelines |
 | [contrast-check](./contrast-check.md) | Color contrast analysis with fix suggestions | Design reviews, APCA evaluation |
-| [pre-deploy-check](./pre-deploy-check.md) | Verify compliance before deployment | Deployment gates, release checklists |
-| [quick-wins-report](./quick-wins-report.md) | High-impact, low-effort fixes | Sprint planning, quick improvements |
+| [pre-deploy-check](./pre-deploy-check.md) | Verify compliance with score threshold before deployment | Deployment gates, release checklists |
+| [quick-wins-report](./quick-wins-report.md) | High-impact, low-effort fixes from all three tools | Sprint planning, quick improvements |
 | [explain-wcag-criterion](./explain-wcag-criterion.md) | Deep dive into any WCAG criterion | Learning, team training |
+| [lighthouse-audit](./lighthouse-audit.md) | Lighthouse score-focused accessibility audit | Score tracking, Lighthouse insights |
+| [lighthouse-score-improvement](./lighthouse-score-improvement.md) | Phased plan to reach a target accessibility score | Score improvement, sprint planning |
 
 ## How to Use Prompts
 
@@ -44,6 +46,8 @@ Use the full-accessibility-audit prompt with:
 | Deployment gate with GO/NO-GO decision | ✅ `pre-deploy-check` | |
 | Quick check during development | ✅ `quick-accessibility-check` | |
 | Focused contrast analysis with fixes | ✅ `contrast-check` | |
+| Score-focused Lighthouse audit | ✅ `lighthouse-audit` | |
+| Improve score toward a target | ✅ `lighthouse-score-improvement` | |
 | Learning about WCAG criteria | ✅ `explain-wcag-criterion` | |
 | Custom analysis with specific options | | ✅ Use tools directly |
 | Automated scripts or CI/CD | | ✅ Use tools directly |

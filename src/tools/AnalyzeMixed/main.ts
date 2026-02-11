@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { AxeAdapter } from '../Axe/adapters/index.js';
 import { Pa11yAdapter } from '../Pa11y/adapters/index.js';
+import { LighthouseAdapter } from '../Lighthouse/adapters/index.js';
 import { CombinedAnalysisInputSchema, type CombinedAnalysisInput } from './types/index.js';
 import type { AnalysisResult, CombinedAnalysisResult, ToolSource } from '@/shared/types/accessibility.js';
 import {
@@ -22,8 +23,10 @@ import {
 
 let sharedAxeAdapter: AxeAdapter | null = null;
 let sharedPa11yAdapter: Pa11yAdapter | null = null;
+let sharedLighthouseAdapter: LighthouseAdapter | null = null;
 let currentAxeIgnoreHTTPS = false;
 let currentPa11yIgnoreHTTPS = false;
+let currentLighthouseIgnoreHTTPS = false;
 
 function getAxeAdapter(ignoreHTTPSErrors = false): AxeAdapter {
   if (!sharedAxeAdapter || currentAxeIgnoreHTTPS !== ignoreHTTPSErrors) {
@@ -56,13 +59,30 @@ function getPa11yAdapter(ignoreHTTPSErrors = false): Pa11yAdapter {
   return sharedPa11yAdapter;
 }
 
+function getLighthouseAdapter(ignoreHTTPSErrors = false): LighthouseAdapter {
+  if (!sharedLighthouseAdapter || currentLighthouseIgnoreHTTPS !== ignoreHTTPSErrors) {
+    if (sharedLighthouseAdapter) {
+      sharedLighthouseAdapter.dispose().catch(() => {});
+    }
+    sharedLighthouseAdapter = new LighthouseAdapter({
+      headless: true,
+      timeout: 60000,
+      ignoreHTTPSErrors,
+    });
+    currentLighthouseIgnoreHTTPS = ignoreHTTPSErrors;
+  }
+  return sharedLighthouseAdapter;
+}
+
 async function disposeAdapters(): Promise<void> {
   await Promise.all([
     sharedAxeAdapter?.dispose(),
-    sharedPa11yAdapter?.dispose()
+    sharedPa11yAdapter?.dispose(),
+    sharedLighthouseAdapter?.dispose(),
   ]);
   sharedAxeAdapter = null;
   sharedPa11yAdapter = null;
+  sharedLighthouseAdapter = null;
 }
 
 const handleCombinedAnalysis = withToolContext<CombinedAnalysisInput>(
@@ -127,6 +147,30 @@ const handleCombinedAnalysis = withToolContext<CombinedAnalysisInput>(
       );
     }
 
+    if (toolsToRun.includes('lighthouse')) {
+      if (!input.url) {
+        errors.push('Lighthouse: Only URL targets are supported. Provide a url instead of html.');
+        context.logger.warn('Lighthouse skipped: no URL provided');
+      } else {
+        analysisPromises.push(
+          (async () => {
+            try {
+              const adapter = getLighthouseAdapter(ignoreHTTPSErrors);
+              const result = await adapter.analyze(target, options);
+              results.push(result);
+              context.logger.debug('Lighthouse analysis completed', { issueCount: result.issues.length });
+            } catch (error) {
+              const msg = error instanceof Error ? error.message : String(error);
+              errors.push(`Lighthouse: ${msg}`);
+              context.logger.error('Lighthouse analysis failed', {
+                error: error instanceof Error ? error : new Error(String(error))
+              });
+            }
+          })()
+        );
+      }
+    }
+
     await Promise.all(analysisPromises);
 
     const allIssues = results.flatMap(r => r.issues);
@@ -168,10 +212,10 @@ const CombinedToolMcpInputSchema = z.object({
   url: z.string().url().optional().describe('URL of the page to analyze'),
   html: z.string().min(1).optional().describe('Raw HTML content to analyze'),
   tools: z
-    .array(z.enum(['axe-core', 'pa11y']))
+    .array(z.enum(['axe-core', 'pa11y', 'lighthouse']))
     .min(1)
     .default(['axe-core', 'pa11y'])
-    .describe('Tools to run for web analysis'),
+    .describe("Tools to run for web analysis. Note: 'lighthouse' requires a URL (html not supported)"),
   options: z
     .object({
       wcagLevel: z
@@ -206,17 +250,19 @@ export const analyzeMixedTool: ToolDefinition = {
   name: 'analyze-mixed',
   description: `Run multiple accessibility analysis tools in parallel and combine results.
 
-Executes axe-core and Pa11y for web analysis (URL/HTML).
+Executes axe-core, Pa11y, and/or Lighthouse for web analysis.
 
 Input options:
 - url: URL of the page to analyze (required for web analysis)
 - html: Raw HTML content (alternative to url for web analysis)
-- tools: Array of tools to run ['axe-core', 'pa11y']. Default: ['axe-core', 'pa11y']
+- tools: Array of tools to run ['axe-core', 'pa11y', 'lighthouse']. Default: ['axe-core', 'pa11y']
 - options.wcagLevel: WCAG level (A, AA, AAA). Default: AA
 - options.deduplicateResults: Merge similar issues from different tools. Default: true
 - options.browser.waitForSelector: CSS selector to wait for
 - options.browser.viewport: Browser viewport dimensions
 - options.browser.ignoreHTTPSErrors: Ignore SSL certificate errors (for local dev servers). Default: false
+
+Note: Lighthouse requires a live URL - raw HTML content is not supported. If html is provided with lighthouse selected, lighthouse will be skipped.
 
 Output:
 - issues: Combined and deduplicated accessibility issues

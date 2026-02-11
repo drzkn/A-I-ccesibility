@@ -31,6 +31,7 @@ describe('pre-deploy-check Prompt', () => {
     expect(prompt?.title).toBe('Pre-Deploy Accessibility Check');
     expect(prompt?.description.length).toBeGreaterThan(20);
     expect(prompt?.argsSchema).toHaveProperty('url');
+    expect(prompt?.argsSchema).toHaveProperty('minScore');
   });
 
   it('should generate deployment gate check prompt with GO/NO-GO decision format', async () => {
@@ -45,6 +46,7 @@ describe('pre-deploy-check Prompt', () => {
     const text = message?.content.text;
     expect(text).toContain(testUrl);
     expect(text).toContain('analyze-mixed');
+    expect(text).toContain('analyze-with-lighthouse');
     expect(text).toContain('wcagLevel: "AA"');
     expect(text).toContain('deployment gate check');
     expect(text).toContain('GO');
@@ -57,5 +59,45 @@ describe('pre-deploy-check Prompt', () => {
     expect(text).toContain('Recommended Actions');
     expect(text).toContain('If NO-GO');
     expect(text).toContain('If GO');
+  });
+
+  it('should include Lighthouse score gate with default threshold of 90', async () => {
+    const testUrl = 'https://staging.example.com';
+    const result = await promptHandler({ url: testUrl });
+
+    const text = result.messages[0]?.content.text;
+    expect(text).toContain('Lighthouse Score Gate');
+    expect(text).toContain('Lighthouse accessibility score');
+    expect(text).toContain('90/100');
+    expect(text).toContain('Lighthouse score >= 90');
+    expect(text).toContain('Lighthouse score < 85');
+  });
+
+  it('should use custom minScore when provided', async () => {
+    const testUrl = 'https://staging.example.com';
+    const result = await promptHandler({ url: testUrl, minScore: 95 });
+
+    const text = result.messages[0]?.content.text;
+    expect(text).toContain('95/100');
+    expect(text).toContain('Lighthouse score >= 95');
+    expect(text).toContain('Lighthouse score < 90');
+  });
+
+  it('should reference both analyze-mixed and analyze-with-lighthouse tools', async () => {
+    const testUrl = 'https://staging.example.com';
+    const result = await promptHandler({ url: testUrl });
+
+    const text = result.messages[0]?.content.text;
+    expect(text).toContain('Step 1: Use the analyze-mixed tool');
+    expect(text).toContain('Step 2: Use the analyze-with-lighthouse tool');
+  });
+
+  it('should include score improvement guidance in NO-GO actions', async () => {
+    const testUrl = 'https://staging.example.com';
+    const result = await promptHandler({ url: testUrl });
+
+    const text = result.messages[0]?.content.text;
+    expect(text).toContain('most improve the Lighthouse score');
+    expect(text).toContain('reach the 90 score threshold');
   });
 });

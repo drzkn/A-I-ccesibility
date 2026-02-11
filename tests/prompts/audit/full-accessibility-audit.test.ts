@@ -34,7 +34,7 @@ describe('full-accessibility-audit Prompt', () => {
     expect(prompt?.argsSchema).toHaveProperty('wcagLevel');
   });
 
-  it('should generate prompt with default wcagLevel AA and required instructions', async () => {
+  it('should generate prompt combining all three tools with report sections and Lighthouse score', async () => {
     const testUrl = 'https://test-site.com';
     const result = await promptHandler({ url: testUrl });
 
@@ -47,20 +47,33 @@ describe('full-accessibility-audit Prompt', () => {
     expect(text).toContain(testUrl);
     expect(text).toContain('AA');
     expect(text).toContain('analyze-mixed');
+    expect(text).toContain('analyze-with-lighthouse');
     expect(text).toContain('axe-core');
     expect(text).toContain('pa11y');
+    expect(text).toContain('axe-core, Pa11y, and Lighthouse');
+    expect(text).toContain('Lighthouse Accessibility Score');
+    expect(text).toContain('Poor < 50');
+    expect(text).toContain('Needs Improvement 50-89');
+    expect(text).toContain('Good 90-100');
     expect(text).toContain('Perceivable');
     expect(text).toContain('Operable');
     expect(text).toContain('Understandable');
     expect(text).toContain('Robust');
+    expect(text).toContain('Executive Summary');
     expect(text).toContain('Remediation');
+    expect(text).toContain('Impact on Lighthouse score');
+    expect(text).toContain('Score Improvement Projection');
   });
 
-  it('should respect provided wcagLevel parameter', async () => {
+  it('should pass wcagLevel to both analyze-mixed and analyze-with-lighthouse', async () => {
     const resultA = await promptHandler({ url: 'https://example.com', wcagLevel: 'A' });
     const resultAAA = await promptHandler({ url: 'https://example.com', wcagLevel: 'AAA' });
 
     expect(resultA.messages[0]?.content.text).toContain('"A"');
     expect(resultAAA.messages[0]?.content.text).toContain('AAA');
+
+    const textAAA = resultAAA.messages[0]?.content.text;
+    const lighthouseSection = textAAA.substring(textAAA.indexOf('analyze-with-lighthouse'));
+    expect(lighthouseSection).toContain('wcagLevel: "AAA"');
   });
 });

@@ -33,7 +33,7 @@ describe('quick-wins-report Prompt', () => {
     expect(prompt?.argsSchema).toHaveProperty('url');
   });
 
-  it('should generate prompt with quick wins criteria and output format', async () => {
+  it('should generate prompt with all three tools, quick wins criteria, and Lighthouse score sections', async () => {
     const testUrl = 'https://test-site.com';
     const result = await promptHandler({ url: testUrl });
 
@@ -45,6 +45,8 @@ describe('quick-wins-report Prompt', () => {
     const text = message?.content.text;
     expect(text).toContain(testUrl);
     expect(text).toContain('analyze-mixed');
+    expect(text).toContain('analyze-with-lighthouse');
+    expect(text).toContain('all three tools');
     expect(text).toContain('High Impact');
     expect(text).toContain('Low Effort');
     expect(text).toContain('High Confidence');
@@ -58,6 +60,9 @@ describe('quick-wins-report Prompt', () => {
     expect(text).toContain('Implementation Checklist');
     expect(text).toContain('- [ ]');
     expect(text).toContain('NOT Considered Quick Wins');
+    expect(text).toContain('Current Lighthouse Score');
+    expect(text).toContain('Key failing Lighthouse audits');
     expect(text).toContain('Impact Estimation');
+    expect(text).toContain('Projected Lighthouse score improvement');
   });
 });

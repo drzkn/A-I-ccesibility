@@ -5,7 +5,7 @@ import { BaseToolInputSchema, BrowserOptionsSchema } from '@/tools/Base/types/ba
 
 export const CombinedAnalysisInputSchema = BaseToolInputSchema.extend({
   tools: z
-    .array(z.enum(['axe-core', 'pa11y']))
+    .array(z.enum(['axe-core', 'pa11y', 'lighthouse']))
     .min(1)
     .default(['axe-core', 'pa11y'])
     .describe('Tools to run for web analysis'),
@@ -24,14 +24,14 @@ export const CombinedAnalysisInputSchema = BaseToolInputSchema.extend({
     (data) => data.url !== undefined || data.html !== undefined,
     { message: 'Provide url or html to analyze' }
   )
-  .describe('Input for combined web accessibility analysis (axe-core + Pa11y)');
+  .describe('Input for combined web accessibility analysis (axe-core + Pa11y + Lighthouse)');
 
 export type CombinedAnalysisInput = z.infer<typeof CombinedAnalysisInputSchema>;
 
 export interface CombinedToolOutput {
   success: boolean;
   target: string;
-  toolsUsed: Array<'axe-core' | 'pa11y'>;
+  toolsUsed: Array<'axe-core' | 'pa11y' | 'lighthouse'>;
   issueCount: number;
   deduplicatedCount: number;
   issues: AccessibilityIssue[];

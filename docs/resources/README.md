@@ -8,6 +8,7 @@ MCP Resources provide **read-only data** that clients can query directly. Unlike
 |----------|-------------|-------------|
 | [WCAG Criteria](./wcag-criteria.md) | `wcag://criteria/*` | Complete WCAG 2.1 success criteria database |
 | [Contrast Thresholds](./contrast-thresholds.md) | `contrast://thresholds/*` | Color contrast requirements by algorithm |
+| [Lighthouse Audits](./lighthouse-audits.md) | `lighthouse://audits/*` | Lighthouse accessibility audit catalog with WCAG mappings |
 
 ## How to Access Resources
 
@@ -49,6 +50,14 @@ const wcagCriteria = await client.readResource({
 const contrastThresholds = await client.readResource({ 
   uri: 'contrast://thresholds/wcag21' 
 });
+
+const lighthouseAudits = await client.readResource({ 
+  uri: 'lighthouse://audits' 
+});
+
+const lighthouseAudit = await client.readResource({ 
+  uri: 'lighthouse://audits/color-contrast' 
+});
 ```
 
 ## Use Cases
@@ -61,6 +70,10 @@ const contrastThresholds = await client.readResource({
 | Check contrast ratio requirements | Contrast Thresholds | `contrast://thresholds/wcag21` |
 | Understand APCA vs WCAG21 differences | Contrast Thresholds | `contrast://algorithms` |
 | Validate color combinations | Contrast Thresholds | `contrast://thresholds/apca` |
+| Browse all Lighthouse audits | Lighthouse Audits | `lighthouse://audits` |
+| Look up a specific Lighthouse audit | Lighthouse Audits | `lighthouse://audits/color-contrast` |
+| Find Lighthouse audits by WCAG level | Lighthouse Audits | `lighthouse://audits/level/AA` |
+| Find Lighthouse audits by principle | Lighthouse Audits | `lighthouse://audits/principle/perceivable` |
 
 ## Resources vs Tools vs Prompts
 
@@ -79,3 +92,4 @@ const contrastThresholds = await client.readResource({
 - **Educational purposes**: Learn about accessibility principles
 - **Building custom reports**: Combine resource data with tool outputs
 - **Validating results**: Cross-reference analysis results with official criteria
+- **Understanding Lighthouse audits**: Look up what each Lighthouse audit checks and its WCAG mapping

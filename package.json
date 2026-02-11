@@ -37,8 +37,6 @@
     "wcag",
     "axe-core",
     "pa11y",
-    "eslint",
-    "vue-accessibility",
     "web-accessibility",
     "accessibility-testing"
   ],
@@ -59,22 +57,18 @@
   "dependencies": {
     "@axe-core/puppeteer": "^4.11.0",
     "@modelcontextprotocol/sdk": "^1.25.1",
-    "@vue/compiler-sfc": "^3.5.26",
     "axe-core": "^4.11.1",
     "colorjs.io": "^0.6.1",
-    "eslint": "^9.39.2",
-    "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "pa11y": "^9.0.1",
     "pino": "^10.1.1",
+    "lighthouse": "^13.0.1",
     "puppeteer": "^24.35.0",
-    "vue-eslint-parser": "^10.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.18.0",
     "@types/node": "^22.10.0",
     "@types/pa11y": "^5.3.7",
-    "@vitest/coverage-istanbul": "^4.0.17",
     "@vitest/coverage-v8": "^4.0.17",
     "prettier": "^3.7.4",
     "tsup": "^8.3.0",

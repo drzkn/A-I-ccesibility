@@ -14,7 +14,7 @@ export const quickWinsReportPrompt: PromptDefinition = {
   name: 'quick-wins-report',
   title: 'Accessibility Quick Wins Report',
   description:
-    'Identify high-impact accessibility issues that require minimal effort to fix',
+    'Identify high-impact accessibility issues that require minimal effort to fix using axe-core, Pa11y, and Lighthouse',
 
   register(server: McpServer): void {
     server.registerPrompt(
@@ -33,12 +33,19 @@ export const quickWinsReportPrompt: PromptDefinition = {
                 type: 'text',
                 text: `Analyze ${url} and identify accessibility quick wins.
 
-Use the analyze-mixed tool with these parameters:
+Step 1: Use the analyze-mixed tool with these parameters:
 - url: "${url}"
 - tools: ["axe-core", "pa11y"]
 - options:
   - wcagLevel: "AA"
   - deduplicateResults: true
+
+Step 2: Use the analyze-with-lighthouse tool with these parameters:
+- url: "${url}"
+- options:
+  - wcagLevel: "AA"
+
+After both analyses complete, identify quick wins from all three tools.
 
 ## Quick Wins Criteria
 
@@ -112,12 +119,18 @@ Provide a copyable checklist:
 ...
 \`\`\`
 
-### 6. Impact Estimation
+### 6. Current Lighthouse Score
+
+- **Score**: [0-100] — [Poor < 50 | Needs Improvement 50-89 | Good 90-100]
+- **Key failing Lighthouse audits** that are also quick wins
+
+### 7. Impact Estimation
 
 After implementing all quick wins:
-- Estimated improvement in accessibility score
+- **Projected Lighthouse score improvement** (estimate how much the score could increase)
 - Number of additional users who will have better access
-- WCAG criteria that will be addressed`
+- WCAG criteria that will be addressed
+- Lighthouse audits that will change from failing to passing`
               }
             }
           ]
